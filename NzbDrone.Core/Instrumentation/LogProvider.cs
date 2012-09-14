@@ -24,6 +24,11 @@ namespace NzbDrone.Core.Instrumentation
             _environmentProvider = environmentProvider;
         }
 
+        public virtual List<Log> GetAllLogs()
+        {
+            return _database.Fetch<Log>();
+        }
+
         public virtual Page<Log> GetPagedItems(DataTablesPageRequest pageRequest)
         {
             var query = Sql.Builder

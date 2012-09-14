@@ -20,7 +20,6 @@ namespace NzbDrone.Core.Test.ProviderTests.LogProviderTests
 
         private const string LOGGER_NAME = "Core.Test.ProviderTests.LogProviderTests.LogProviderFixture";
 
-        private static LogDbContext dbContext;
         private static string UniqueMessage;
 
         Logger Logger;
@@ -29,10 +28,6 @@ namespace NzbDrone.Core.Test.ProviderTests.LogProviderTests
         public void Setup()
         {
             WithRealDb();
-
-            dbContext = Connection.GetLogDbContext(TestDbHelper.ConnectionString);
-
-            Mocker.SetConstant(dbContext);
 
             new DatabaseTarget(Db).Register();
             Logger = LogManager.GetCurrentClassLogger();

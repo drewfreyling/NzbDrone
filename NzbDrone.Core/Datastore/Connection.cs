@@ -83,11 +83,6 @@ namespace NzbDrone.Core.Datastore
             return GetPetaPocoDb(LogConnectionString, _configFileProvider.DatabaseType, profiled);
         }
 
-        public LogDbContext GetLogEfContext()
-        {
-            return GetLogDbContext(LogConnectionString, _configFileProvider.DatabaseType);
-        }
-
         public static IDatabase GetPetaPocoDb(string connectionString, DatabaseType databaseType = DatabaseType.SQLCE, Boolean profiled = true)
         {
             MigrationsHelper.Run(connectionString, databaseType, true);
@@ -107,20 +102,6 @@ namespace NzbDrone.Core.Datastore
                          };
 
             return db;
-        }
-
-        public static LogDbContext GetLogDbContext(string connectionString, DatabaseType databaseType = DatabaseType.SQLCE)
-        {
-            MigrationsHelper.Run(connectionString, databaseType, true);
-
-            if (databaseType == DatabaseType.SQLite)
-            {
-                DbConnection sqliteConnection = new SQLiteConnection(connectionString);
-                return new LogDbContext(sqliteConnection);
-            }
-
-            DbConnection sqlCeConnection = new SqlCeConnection(connectionString);
-            return new LogDbContext(sqlCeConnection);
         }
     }
 }
