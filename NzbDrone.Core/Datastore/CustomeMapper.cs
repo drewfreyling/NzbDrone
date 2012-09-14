@@ -31,6 +31,16 @@ namespace NzbDrone.Core.Datastore
                            };
             }
 
+            if (sourceType == typeof(String) && destinationType.IsGenericType && destinationType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return delegate(object s)
+                {
+                    DateTime value;
+                    DateTime.TryParse(s.ToString(), out value);
+                    return value;
+                };
+            }
+
             return base.GetFromDbConverter(destinationType, sourceType);
         }
 

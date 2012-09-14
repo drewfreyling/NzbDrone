@@ -17,7 +17,6 @@ namespace NzbDrone.Core.Providers
         private readonly IDatabase _database;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-
         [Inject]
         public HistoryProvider(IDatabase database)
         {
@@ -38,8 +37,7 @@ namespace NzbDrone.Core.Providers
             return _database.Fetch<History, Episode>(@"
                             SELECT History.*, Series.Title as SeriesTitle, Episodes.* FROM History 
 		                    INNER JOIN Series ON History.SeriesId = Series.SeriesId
-                            INNER JOIN Episodes ON History.EpisodeId = Episodes.EpisodeId
-                        ");
+                            INNER JOIN Episodes ON History.EpisodeId = Episodes.EpisodeId");
         }
 
         public virtual void Purge()
@@ -62,13 +60,13 @@ namespace NzbDrone.Core.Providers
 
         public virtual Quality GetBestQualityInHistory(int seriesId, int seasonNumber, int episodeNumber)
         {
-            var quality = _database.SingleOrDefault<dynamic>(@"SELECT TOP 1 History.Quality , History.IsProper FROM History 
+            var quality = _database.FirstOrDefault<dynamic>(@"SELECT History.Quality, History.IsProper FROM History 
                                                     INNER JOIN Episodes ON History.EpisodeId = Episodes.EpisodeId 
                                                     WHERE Episodes.seriesId = @0 AND 
                                                           Episodes.SeasonNumber = @1 AND  
                                                           Episodes.EpisodeNumber = @2
-                                                    ORDER BY History.Quality DESC, History.IsProper DESC"
-                                                    , seriesId, seasonNumber, episodeNumber);
+                                                    ORDER BY History.Quality DESC, History.IsProper DESC",
+                                                    seriesId, seasonNumber, episodeNumber);
 
             if (quality == null) return null;
 
