@@ -2,6 +2,7 @@
 using System.IO;
 using NUnit.Framework;
 using NzbDrone.Common;
+using NzbDrone.Common.Model;
 using NzbDrone.Core.Model.Notification;
 using NzbDrone.Core.Providers.Core;
 using NzbDrone.Test.Common;
@@ -35,7 +36,6 @@ namespace NzbDrone.Core.Test.Framework
             TestDbHelper.CreateDataBaseTemplate();
         }
 
-
         private IDatabase _db;
         protected IDatabase Db
         {
@@ -53,7 +53,6 @@ namespace NzbDrone.Core.Test.Framework
             _db = TestDbHelper.GetEmptyDatabase();
             Mocker.SetConstant(Db);
         }
-
 
         protected static ProgressNotification MockNotification
         {

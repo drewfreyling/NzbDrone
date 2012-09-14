@@ -12,13 +12,11 @@ namespace NzbDrone.Core.Datastore
     class DbProviderFactory : System.Data.Common.DbProviderFactory
     {
         public Boolean IsProfiled { get; set; }
+        public DatabaseType DatabaseType { get; set; }
 
         public override DbConnection CreateConnection()
         {
-            var environmentProvider = new EnvironmentProvider();
-            var configFileProvider = new ConfigFileProvider(environmentProvider);
-
-            if (configFileProvider.DatabaseType == DatabaseType.SQLite)
+            if (DatabaseType == DatabaseType.SQLite)
             {
                 var sqliteConnection = new SQLiteConnection();
                 DbConnection connection = sqliteConnection;

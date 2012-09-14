@@ -13,7 +13,6 @@ namespace NzbDrone.Core.Datastore
     public class Connection
     {
         private readonly EnvironmentProvider _environmentProvider;
-        private readonly ConfigFileProvider _configFileProvider;
 
         static Connection()
         {
@@ -31,38 +30,19 @@ namespace NzbDrone.Core.Datastore
             , "System.Data.SQLite.SQLiteFactory, System.Data.SQLite");
         }
 
-        public Connection(EnvironmentProvider environmentProvider, ConfigFileProvider configFileProvider)
+        public Connection(EnvironmentProvider environmentProvider)
         {
             _environmentProvider = environmentProvider;
-            _configFileProvider = configFileProvider;
         }
 
-        public String MainConnectionString
+        public String MainConnectionString(DatabaseType databaseType = DatabaseType.SQLCE)
         {
-            get
-            {
-                var databaseType = _configFileProvider.DatabaseType;
-                return GetConnectionString(_environmentProvider.GetNzbDroneDbFile(databaseType), databaseType);
-            }
+            return GetConnectionString(_environmentProvider.GetNzbDroneDbFile(databaseType), databaseType);
         }
 
-        public String LogConnectionString
+        public String LogConnectionString(DatabaseType databaseType = DatabaseType.SQLCE)
         {
-            get
-            {
-                var databaseType = _configFileProvider.DatabaseType;
-                //if (databaseType == DatabaseType.SQLite)
-                //{
-                //    var connectionString = _environmentProvider.GetLogDbFileDbFile(databaseType);
-                //    return
-                //            GetConnectionString(
-                //                                String.Format(
-                //                                              "metadata=res://*/datacon.csdl|res://*/datacon.ssdl|res://*/datacon.msl;provider=System.Data.SQLite;provider connection string='{0}'",
-                //                                              connectionString), databaseType);
-                //}
-
-                return GetConnectionString(_environmentProvider.GetLogDbFileDbFile(databaseType), databaseType); 
-            }
+            return GetConnectionString(_environmentProvider.GetLogDbFileDbFile(databaseType), databaseType);
         }
 
         public static string GetConnectionString(string path, DatabaseType databaseType = DatabaseType.SQLCE)
@@ -73,14 +53,14 @@ namespace NzbDrone.Core.Datastore
             return String.Format("Data Source=\"{0}\"; Max Database Size = 512;", path);
         }
 
-        public IDatabase GetMainPetaPocoDb(Boolean profiled = true)
+        public IDatabase GetMainPetaPocoDb(DatabaseType databaseType = DatabaseType.SQLCE, Boolean profiled = true) 
         {
-            return GetPetaPocoDb(MainConnectionString, _configFileProvider.DatabaseType, profiled);
+            return GetPetaPocoDb(MainConnectionString(databaseType), databaseType, profiled);
         }
 
-        public IDatabase GetLogPetaPocoDb(Boolean profiled = true)
+        public IDatabase GetLogPetaPocoDb(DatabaseType databaseType = DatabaseType.SQLCE, Boolean profiled = true)
         {
-            return GetPetaPocoDb(LogConnectionString, _configFileProvider.DatabaseType, profiled);
+            return GetPetaPocoDb(LogConnectionString(databaseType), databaseType, profiled);
         }
 
         public static IDatabase GetPetaPocoDb(string connectionString, DatabaseType databaseType = DatabaseType.SQLCE, Boolean profiled = true)
@@ -89,7 +69,8 @@ namespace NzbDrone.Core.Datastore
 
             var factory = new DbProviderFactory
                               {
-                                  IsProfiled = profiled
+                                  IsProfiled = profiled,
+                                  DatabaseType = databaseType
                               };
 
             var petaPocoDbType = Database.DBType.SqlServerCE;

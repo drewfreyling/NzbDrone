@@ -59,11 +59,12 @@ namespace NzbDrone.Core
             var appDataPath = _environmentProvider.GetAppDataPath();
             if (!Directory.Exists(appDataPath)) Directory.CreateDirectory(appDataPath);
 
+            var databaseType = new ConfigFileProvider(_environmentProvider).DatabaseType;
+
             var connection = Kernel.Get<Connection>();
-            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetMainPetaPocoDb()).InTransientScope();
-            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetLogPetaPocoDb(false)).WhenInjectedInto<DatabaseTarget>().InSingletonScope();
-            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetLogPetaPocoDb()).WhenInjectedInto<LogProvider>();
-            //Kernel.Bind<LogDbContext>().ToMethod(c => connection.GetLogEfContext()).WhenInjectedInto<LogProvider>().InSingletonScope();
+            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetMainPetaPocoDb(databaseType)).InTransientScope();
+            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetLogPetaPocoDb(databaseType, profiled: false)).WhenInjectedInto<DatabaseTarget>().InSingletonScope();
+            Kernel.Bind<IDatabase>().ToMethod(c => connection.GetLogPetaPocoDb(databaseType)).WhenInjectedInto<LogProvider>();
 
             Kernel.Get<DatabaseTarget>().Register();
             LogConfiguration.Reload();
