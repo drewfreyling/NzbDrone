@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using NzbDrone.Common.Model;
 
 namespace NzbDrone.Common
 {
@@ -16,6 +17,8 @@ namespace NzbDrone.Common
 
         public const string NZBDRONE_DB_FILE = "nzbdrone.sdf";
         public const string LOG_DB_FILE = "log.sdf";
+        public const string NZBDRONE_SQLITE_DB_FILE = "nzbdrone.db";
+        public const string LOG_SQLITE_DB_FILE = "log.db";
 
         private const string BACKUP_ZIP_FILE = "NzbDrone_Backup.zip";
 
@@ -77,13 +80,19 @@ namespace NzbDrone.Common
             return Path.Combine(environmentProvider.ApplicationPath, APP_CONFIG_FILE);
         }
 
-        public static string GetNzbDroneDbFile(this EnvironmentProvider environmentProvider)
+        public static string GetNzbDroneDbFile(this EnvironmentProvider environmentProvider, DatabaseType databaseType = DatabaseType.SQLCE)
         {
+            if (databaseType == DatabaseType.SQLite)
+                return Path.Combine(environmentProvider.GetAppDataPath(), NZBDRONE_SQLITE_DB_FILE);
+
             return Path.Combine(environmentProvider.GetAppDataPath(), NZBDRONE_DB_FILE);
         }
 
-        public static string GetLogDbFileDbFile(this EnvironmentProvider environmentProvider)
+        public static string GetLogDbFileDbFile(this EnvironmentProvider environmentProvider, DatabaseType databaseType = DatabaseType.SQLCE)
         {
+            if (databaseType == DatabaseType.SQLite)
+                return Path.Combine(environmentProvider.GetAppDataPath(), LOG_SQLITE_DB_FILE);
+
             return Path.Combine(environmentProvider.GetAppDataPath(), LOG_DB_FILE);
         }
 

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Data.Common;
+using System.Data.SQLite;
 using System.Data.SqlServerCe;
+using NzbDrone.Common;
+using NzbDrone.Common.Model;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -12,15 +15,34 @@ namespace NzbDrone.Core.Datastore
 
         public override DbConnection CreateConnection()
         {
-            var sqliteConnection = new SqlCeConnection();
-            DbConnection connection = sqliteConnection;
+            var environmentProvider = new EnvironmentProvider();
+            var configFileProvider = new ConfigFileProvider(environmentProvider);
 
-            if (IsProfiled)
+            if (configFileProvider.DatabaseType == DatabaseType.SQLite)
             {
-                connection = new ProfiledDbConnection(sqliteConnection, MiniProfiler.Current);
+                var sqliteConnection = new SQLiteConnection();
+                DbConnection connection = sqliteConnection;
+
+                if (IsProfiled)
+                {
+                    connection = new ProfiledDbConnection(sqliteConnection, MiniProfiler.Current);
+                }
+
+                return connection;
             }
 
-            return connection;
+            else
+            {
+                var sqlCeConnection = new SqlCeConnection();
+                DbConnection connection = sqlCeConnection;
+
+                if (IsProfiled)
+                {
+                    connection = new ProfiledDbConnection(sqlCeConnection, MiniProfiler.Current);
+                }
+
+                return connection;
+            }
         }
     }
 }

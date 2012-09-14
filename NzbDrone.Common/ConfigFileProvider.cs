@@ -62,6 +62,20 @@ namespace NzbDrone.Common
             set { SetValue("AuthenticationType", (int)value); }
         }
 
+        public virtual DatabaseType DatabaseType
+        {
+            get
+            {
+                DatabaseType dbType ;
+                if (!Enum.TryParse(GetValue("DatabaseType", "SQLCE"), true, out dbType))
+                    return DatabaseType.SQLCE;
+
+                return dbType;
+            }
+
+            set { SetValue("DatabaseType", value.ToString()); }
+        }
+
         public virtual bool EnableProfiler
         {
             get { return GetValueBoolean("EnableProfiler", false); }
@@ -97,7 +111,6 @@ namespace NzbDrone.Common
             //return the default value
             return defaultValue.ToString();
         }
-
 
         public virtual void SetValue(string key, object value)
         {

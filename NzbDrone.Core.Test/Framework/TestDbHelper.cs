@@ -6,6 +6,7 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NzbDrone.Common;
+using NzbDrone.Common.Model;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Providers.Core;
 using NzbDrone.Core.Repository;
