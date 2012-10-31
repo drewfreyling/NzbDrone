@@ -49,6 +49,10 @@ namespace NzbDrone.Core.Test.ProviderTests.PostDownloadProviderTests
             Mocker.GetMock<SeriesProvider>()
                 .Setup(c => c.FindSeries(It.IsAny<string>()))
                 .Returns(fakeSeries);
+
+            Mocker.GetMock<DiskProvider>()
+                .Setup(c => c.FolderExists(fakeSeries.Path))
+                .Returns(true);
         }
 
         private void WithImportableFiles()
@@ -295,6 +299,8 @@ namespace NzbDrone.Core.Test.ProviderTests.PostDownloadProviderTests
             Mocker.GetMock<DiskScanProvider>().Setup(s => s.MoveEpisodeFile(It.IsAny<EpisodeFile>(), true)).Returns(new EpisodeFile());
             Mocker.GetMock<DiskProvider>().Setup(s => s.GetDirectorySize(droppedFolder.FullName)).Returns(Constants.IgnoreFileSize - 1.Megabytes());
             Mocker.GetMock<DiskProvider>().Setup(s => s.DeleteFolder(droppedFolder.FullName, true));
+            Mocker.GetMock<DiskProvider>().Setup(s => s.FolderExists(fakeSeries.Path)).Returns(true);
+            Mocker.GetMock<DiskProvider>().Setup(s => s.IsFolderLocked(droppedFolder.FullName)).Returns(false);
             Mocker.GetMock<MetadataProvider>().Setup(s => s.CreateForEpisodeFiles(It.IsAny<List<EpisodeFile>>()));
 
             //Act
@@ -316,6 +322,7 @@ namespace NzbDrone.Core.Test.ProviderTests.PostDownloadProviderTests
                 .Build().ToList();
 
             Mocker.GetMock<SeriesProvider>().Setup(s => s.FindSeries(It.IsAny<string>())).Returns(fakeSeries);
+            Mocker.GetMock<DiskProvider>().Setup(s => s.FolderExists(fakeSeries.Path)).Returns(true);
             Mocker.GetMock<DiskScanProvider>().Setup(s => s.Scan(fakeSeries, droppedFolder.FullName)).Returns(fakeEpisodeFiles);
 
             //Act
@@ -344,6 +351,10 @@ namespace NzbDrone.Core.Test.ProviderTests.PostDownloadProviderTests
             Mocker.GetMock<DiskProvider>()
                     .Setup(s => s.GetDirectorySize(downloadName.FullName))
                     .Returns(10);
+
+            Mocker.GetMock<DiskProvider>()
+                    .Setup(s => s.FolderExists(series.Path))
+                    .Returns(true);
 
             Mocker.GetMock<DiskProvider>()
                     .Setup(s => s.FreeDiskSpace(new DirectoryInfo(series.Path)))
@@ -406,6 +417,39 @@ namespace NzbDrone.Core.Test.ProviderTests.PostDownloadProviderTests
 
             //Assert
             Mocker.GetMock<DiskScanProvider>().Verify(c => c.Scan(fakeSeries, downloadName.FullName), Times.Once());
+        }
+
+        [Test]
+        public void should_return_if_series_path_does_not_exist()
+        {
+            var downloadName = new DirectoryInfo(@"C:\Test\Drop\30.Rock.S01E01.Pilot");
+
+            WithValidSeries();
+
+            Mocker.GetMock<DiskProvider>()
+                    .Setup(s => s.FolderExists(fakeSeries.Path))
+                    .Returns(false);
+
+            Mocker.Resolve<PostDownloadProvider>().ProcessDownload(downloadName);
+
+            Mocker.GetMock<DiskProvider>().Verify(c => c.GetDirectorySize(It.IsAny<String>()), Times.Never());
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_skip_if_folder_is_in_use_by_another_process()
+        {
+            var downloadName = new DirectoryInfo(@"C:\Test\Drop\30.Rock.S01E01.Pilot");
+
+            WithValidSeries();
+
+            Mocker.GetMock<DiskProvider>()
+                    .Setup(s => s.IsFolderLocked(downloadName.FullName))
+                    .Returns(true);
+
+            Mocker.Resolve<PostDownloadProvider>().ProcessDownload(downloadName);
+
+            Mocker.GetMock<DiskProvider>().Verify(c => c.GetDirectorySize(It.IsAny<String>()), Times.Never());
         }
     }
 }

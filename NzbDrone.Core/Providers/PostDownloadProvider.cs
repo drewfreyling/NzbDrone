@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Providers
                 }
                 catch (Exception e)
                 {
-                    Logger.ErrorException("An error has occurred while importing folder" + subfolder, e);
+                    Logger.ErrorException("An error has occurred while importing folder: " + subfolder, e);
                 }
             }
 
@@ -71,6 +71,12 @@ namespace NzbDrone.Core.Providers
                 return;
             }
 
+            if (_diskProvider.IsFolderLocked(subfolderInfo.FullName))
+            {
+                Logger.Trace("[{0}] is currently locked by another process, skipping", subfolderInfo.Name);
+                return;
+            }
+
             string seriesName = Parser.ParseSeriesName(RemoveStatusFromFolderName(subfolderInfo.Name));
             var series = _seriesProvider.FindSeries(seriesName);
 
@@ -78,6 +84,12 @@ namespace NzbDrone.Core.Providers
             {
                 Logger.Trace("Unknown Series on Import: {0}", subfolderInfo.Name);
                 TagFolder(subfolderInfo, PostDownloadStatusType.UnknownSeries);
+                return;
+            }
+
+            if (!_diskProvider.FolderExists(series.Path))
+            {
+                Logger.Warn("Series Folder doesn't exist: {0}", series.Path);
                 return;
             }
 
@@ -129,6 +141,12 @@ namespace NzbDrone.Core.Providers
                 return;
             }
 
+            if (_diskProvider.IsFileLocked(new FileInfo(videoFile)))
+            {
+                Logger.Trace("[{0}] is currently locked by another process, skipping", videoFile);
+                return;
+            }
+
             var seriesName = Parser.ParseSeriesName(Path.GetFileNameWithoutExtension(videoFile));
             var series = _seriesProvider.FindSeries(seriesName);
 
@@ -138,7 +156,13 @@ namespace NzbDrone.Core.Providers
                 return;
             }
 
-            var size = _diskProvider.GetFileSize(videoFile);
+            if (!_diskProvider.FolderExists(series.Path))
+            {
+                Logger.Warn("Series Folder doesn't exist: {0}", series.Path);
+                return;
+            }
+
+            var size = _diskProvider.GetSize(videoFile);
             var freeSpace = _diskProvider.FreeDiskSpace(new DirectoryInfo(series.Path));
 
             if (Convert.ToUInt64(size) > freeSpace)

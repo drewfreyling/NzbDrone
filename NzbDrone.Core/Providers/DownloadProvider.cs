@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ninject;
 using NLog;
 using NzbDrone.Core.Model;
@@ -48,20 +49,20 @@ namespace NzbDrone.Core.Providers
 
             var provider = GetActiveDownloadClient();
 
-            bool success = provider.DownloadNzb(parseResult.NzbUrl, GetDownloadTitle(parseResult));
+            bool success = provider.DownloadNzb(parseResult.NzbUrl, downloadTitle);
 
             if (success)
             {
                 logger.Trace("Download added to Queue: {0}", downloadTitle);
 
-                foreach (var episode in _episodeProvider.GetEpisodesByParseResult(parseResult))
+                foreach (var episode in parseResult.Episodes)
                 {
                     var history = new History
                                       {
                                             Date = DateTime.Now,
                                             Indexer = parseResult.Indexer,
                                             IsProper = parseResult.Quality.Proper,
-                                            Quality = parseResult.Quality.QualityType,
+                                            Quality = parseResult.Quality.Quality,
                                             NzbTitle = parseResult.OriginalString,
                                             EpisodeId = episode.EpisodeId,
                                             SeriesId = episode.SeriesId,
@@ -96,18 +97,15 @@ namespace NzbDrone.Core.Providers
             }
         }
 
-
         public virtual String GetDownloadTitle(EpisodeParseResult parseResult)
         {
-
             var seriesTitle = MediaFileProvider.CleanFilename(parseResult.Series.Title);
-
 
             //Handle Full Naming
             if (parseResult.FullSeason)
             {
                 var seasonResult = String.Format("{0} - Season {1} [{2}]", seriesTitle,
-                                     parseResult.SeasonNumber, parseResult.Quality.QualityType);
+                                     parseResult.SeasonNumber, parseResult.Quality.Quality);
 
                 if (parseResult.Quality.Proper)
                     seasonResult += " [Proper]";
@@ -118,7 +116,7 @@ namespace NzbDrone.Core.Providers
             if (parseResult.Series.IsDaily)
             {
                 var dailyResult = String.Format("{0} - {1:yyyy-MM-dd} - {2} [{3}]", seriesTitle,
-                                     parseResult.AirDate, parseResult.EpisodeTitle, parseResult.Quality.QualityType);
+                                     parseResult.AirDate, parseResult.Episodes.First().Title, parseResult.Quality.Quality);
 
                 if (parseResult.Quality.Proper)
                     dailyResult += " [Proper]";
@@ -129,15 +127,25 @@ namespace NzbDrone.Core.Providers
             //Show Name - 1x01-1x02 - Episode Name
             //Show Name - 1x01 - Episode Name
             var episodeString = new List<String>();
+            var episodeNames = new List<String>();
 
-            foreach (var episode in parseResult.EpisodeNumbers)
+            foreach (var episode in parseResult.Episodes)
             {
-                episodeString.Add(String.Format("{0}x{1:00}", parseResult.SeasonNumber, episode));
+                episodeString.Add(String.Format("{0}x{1:00}", episode.SeasonNumber, episode.EpisodeNumber));
+                episodeNames.Add(Parser.CleanupEpisodeTitle(episode.Title));
             }
 
             var epNumberString = String.Join("-", episodeString);
+            string episodeName;
 
-            var result = String.Format("{0} - {1} - {2} [{3}]", seriesTitle, epNumberString, parseResult.EpisodeTitle, parseResult.Quality.QualityType);
+
+            if (episodeNames.Distinct().Count() == 1)
+                episodeName = episodeNames.First();
+
+            else
+                episodeName = String.Join(" + ", episodeNames.Distinct());
+
+            var result = String.Format("{0} - {1} - {2} [{3}]", seriesTitle, epNumberString, episodeName, parseResult.Quality.Quality);
 
             if (parseResult.Quality.Proper)
             {

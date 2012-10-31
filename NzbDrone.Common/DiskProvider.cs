@@ -77,9 +77,11 @@ namespace NzbDrone.Common
 
         public virtual long GetSize(string path)
         {
+            if (!FileExists(path))
+                throw new FileNotFoundException("File doesn't exist: " + path);
+
             var fi = new FileInfo(path);
             return fi.Length;
-            //return new FileInfo(path).Length;
         }
 
         public virtual String CreateDirectory(string path)
@@ -191,6 +193,9 @@ namespace NzbDrone.Common
 
         public virtual ulong FreeDiskSpace(DirectoryInfo directoryInfo)
         {
+            if (!directoryInfo.Exists)
+                throw new DirectoryNotFoundException();
+
             ulong freeBytesAvailable;
             ulong totalNumberOfBytes;
             ulong totalNumberOfFreeBytes;
@@ -218,14 +223,6 @@ namespace NzbDrone.Common
             return String.Equals(firstPath.NormalizePath(), secondPath.NormalizePath(), StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public virtual long GetFileSize(string path)
-        {
-            if (!FileExists(path))
-                throw new FileNotFoundException("File doesn't exist: " + path);
-
-            return new FileInfo(path).Length;
-        }
-
         public virtual void FileSetLastWriteTimeUtc(string path, DateTime dateTime)
         {
             File.SetLastWriteTimeUtc(path, dateTime);
@@ -234,6 +231,49 @@ namespace NzbDrone.Common
         public virtual void DirectorySetLastWriteTimeUtc(string path, DateTime dateTime)
         {
             Directory.SetLastWriteTimeUtc(path, dateTime);
+        }
+
+        public virtual bool IsFolderLocked(string path)
+        {
+            var files = GetFileInfos(path, "*.*", SearchOption.AllDirectories);
+
+            foreach(var fileInfo in files)
+            {
+                if (IsFileLocked(fileInfo))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public virtual bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
+        }
+
+        public virtual bool IsChildOfPath(string child, string parent)
+        {
+            if (Path.GetFullPath(child).StartsWith(Path.GetFullPath(parent)))
+                return true;
+
+            return false;
         }
     }
 }

@@ -96,7 +96,9 @@ namespace NzbDrone.Core.Jobs
 
                 jobDefinition.Enable = job.DefaultInterval.TotalSeconds > 0;
                 jobDefinition.Name = job.Name;
+
                 jobDefinition.Interval = Convert.ToInt32(job.DefaultInterval.TotalMinutes);
+                //Todo: Need to have a way for users to change this and not have it overwritten on start-up.
 
                 SaveDefinition(jobDefinition);
             }
@@ -143,13 +145,12 @@ namespace NzbDrone.Core.Jobs
             logger.Trace("{0} Scheduled tasks have been added to the queue", pendingJobTypes.Count);
         }
 
-        public virtual void QueueJob(Type jobType, int targetId = 0, int secondaryTargetId = 0, JobQueueItem.JobSourceType source = JobQueueItem.JobSourceType.User)
+        public virtual void QueueJob(Type jobType, dynamic options = null, JobQueueItem.JobSourceType source = JobQueueItem.JobSourceType.User)
         {
             var queueItem = new JobQueueItem
             {
                 JobType = jobType,
-                TargetId = targetId,
-                SecondaryTargetId = secondaryTargetId,
+                Options = options,
                 Source = source
             };
 
@@ -194,6 +195,11 @@ namespace NzbDrone.Core.Jobs
 
             QueueJob(type);
             return true;
+        }
+
+        public virtual JobDefinition GetDefinition(Type type)
+        {
+            return _database.Single<JobDefinition>("WHERE TypeName = @0", type.ToString());
         }
 
         private void ProcessQueue()
@@ -270,7 +276,7 @@ namespace NzbDrone.Core.Jobs
                     var sw = Stopwatch.StartNew();
 
                     _notificationProvider.Register(_notification);
-                    jobImplementation.Start(_notification, queueItem.TargetId, queueItem.SecondaryTargetId);
+                    jobImplementation.Start(_notification, queueItem.Options);
                     _notification.Status = ProgressNotificationStatus.Completed;
 
                     settings.LastExecution = DateTime.Now;
@@ -296,7 +302,7 @@ namespace NzbDrone.Core.Jobs
             }
 
             //Only update last execution status if was triggered by the scheduler
-            if (queueItem.TargetId == 0)
+            if (queueItem.Options == null)
             {
                 SaveDefinition(settings);
             }
@@ -321,7 +327,5 @@ namespace NzbDrone.Core.Jobs
             logger.Trace("resetting queue processor thread");
             _jobThread = new Thread(ProcessQueue) { Name = "JobQueueThread" };
         }
-
-
     }
 }

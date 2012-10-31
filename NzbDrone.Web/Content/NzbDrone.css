@@ -65,17 +65,24 @@ hr
 
 #logo
 {
-    font-family: "Segoe UI Light" , "Open Sans" , "Segoe UI" , sans-serif;
-    font-weight: 100;
     height: 135px;
     background: url(images/logo.png) no-repeat left top;
     background-color: #065EFE;
-    font-size: 110px;
     color: white; /**color: rgb(40, 40, 40);**/
     text-transform: lowercase;
     letter-spacing: -1px;
     line-height: 110px;
     padding-left: 140px;
+}
+
+#logo span {
+    font-family: "Segoe UI Light" , "Open Sans" , "Segoe UI" , sans-serif;
+    font-weight: 100;
+    margin-top: 0;
+    padding-top: 0;
+    font-size: 110px;
+    margin-bottom: -20px;
+    display: inline-block;
 }
 
 .stackframe
@@ -115,7 +122,7 @@ hr
 }
 
 
-input[type=text], select
+input[type=text], input[type=date], select
 {
     font-size: small;
     padding: 2px 2px;
@@ -181,13 +188,11 @@ button span, input[type="button"] span, input[type="submit"] span, input[type="r
     height: 25px;
 }
 
-
 .dialog
 {
     margin-left: auto;
     margin-right: auto;
 }
-
 
 .qualitySelector
 {
@@ -195,14 +200,18 @@ button span, input[type="button"] span, input[type="submit"] span, input[type="r
     width: auto;
 }
 
-#quickAdd
-{
-    position: fixed;
-    top: 30px;
-    right: 15px;
+.delete-root {
+    color: red;
+    display: inline-block;
+    cursor: pointer;
 }
 
+.delete-root i:before {
+    vertical-align: middle !important;
+    cursor: pointer !important;
+}
 
+/* Local Series Search */
 #localSeriesLookup
 {
     width: 220px;
@@ -246,4 +255,10 @@ button span, input[type="button"] span, input[type="submit"] span, input[type="r
 
 .series-delete-files {
     padding-top: 15px;
+}
+
+
+/* Font-Awesome */
+i[class*="icon-"]:not(.gridAction):hover {
+    cursor: default;
 }

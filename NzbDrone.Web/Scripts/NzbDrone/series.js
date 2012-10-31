@@ -1,6 +1,6 @@
-﻿var seriesEditorUrl = '../Series/SingleSeriesEditor';
-var saveSeriesEditorUrl = '../Series/SaveSingleSeriesEditor';
-var seriesDeleteUrl = '../Series/DeleteSeries';
+﻿var seriesEditorUrl = '/series/edit';
+var saveSeriesEditorUrl = '/series/edit';
+var seriesDeleteUrl = '/series/delete';
 
 $("#seriesEditor").dialog({
     autoOpen: false,
@@ -67,8 +67,8 @@ $("#seriesDelete").dialog({
 
 $(".editButton").live('click', function () {
     //Get the SeriesId and Title
-    var seriesId = parseInt($(this).attr("value"));
-    var title = $(this).attr("rel");
+    var seriesId = parseInt($(this).attr("data-series-id"));
+    var title = $(this).attr("data-series-title");
 
     //Set the title of the dialog
     $("#seriesEditor").dialog("option", "title", title);
@@ -91,8 +91,8 @@ $(".editButton").live('click', function () {
 
 $(".deleteButton").live('click', function () {
     //Get the SeriesId and Title
-    var seriesId = parseInt($(this).attr("value"));
-    var title = $(this).attr("rel");
+    var seriesId = parseInt($(this).attr("data-series-id"));
+    var title = $(this).attr("data-series-title");
 
     //Fill in the view
     $('#seriesDelete').children('.seriesId').val(seriesId);

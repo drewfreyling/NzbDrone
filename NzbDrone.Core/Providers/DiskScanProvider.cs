@@ -110,8 +110,8 @@ namespace NzbDrone.Core.Providers
 
             long size = _diskProvider.GetSize(filePath);
 
-            //If Size is less than 40MB and contains sample. Check for Size to ensure its not an episode with sample in the title
-            if (size < Constants.IgnoreFileSize && filePath.ToLower().Contains("sample"))
+            //Skip any file under 40MB - New samples don't even have sample in the name...
+            if (size < Constants.IgnoreFileSize)
             {
                 Logger.Trace("[{0}] appears to be a sample. skipping.", filePath);
                 return null;
@@ -121,6 +121,9 @@ namespace NzbDrone.Core.Providers
 
             if (parseResult == null)
                 return null;
+
+            if (!_diskProvider.IsChildOfPath(filePath, series.Path))
+                parseResult.SceneSource = true;
 
             parseResult.SeriesTitle = series.Title; //replaces the nasty path as title to help with logging
             parseResult.Series = series;
@@ -153,7 +156,7 @@ namespace NzbDrone.Core.Providers
             episodeFile.SeriesId = series.SeriesId;
             episodeFile.Path = filePath.NormalizePath();
             episodeFile.Size = size;
-            episodeFile.Quality = parseResult.Quality.QualityType;
+            episodeFile.Quality = parseResult.Quality.Quality;
             episodeFile.Proper = parseResult.Quality.Proper;
             episodeFile.SeasonNumber = parseResult.SeasonNumber;
             episodeFile.SceneName = Path.GetFileNameWithoutExtension(filePath.NormalizePath());
@@ -202,7 +205,8 @@ namespace NzbDrone.Core.Providers
 
             var parseResult = Parser.ParsePath(episodeFile.Path);
             parseResult.Series = series;
-            parseResult.Quality = new Quality{ QualityType = episodeFile.Quality, Proper = episodeFile.Proper };
+            parseResult.Quality = new QualityModel{ Quality = episodeFile.Quality, Proper = episodeFile.Proper };
+            parseResult.Episodes = episodes;
 
             var message = _downloadProvider.GetDownloadTitle(parseResult);
 

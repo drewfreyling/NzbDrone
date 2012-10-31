@@ -1,11 +1,14 @@
-.gridImage, .gridAction
+.gridImage, .gridAction, .grid-icon
 {
-    width: 18px;
-    height: 18px;
+    width: 17px;
     padding: 3px 1px;
-    margin: 0px;
     vertical-align: middle;
     border: none;
+    display: inline-block !important;
+    text-decoration: none !important;
+    color: #000000;
+    font-size: 19px;
+    line-height: 19px;
 }
 
 .gridAction:hover
@@ -68,10 +71,7 @@
     opacity: 0.7;
 }
 
-
-
-.episodeMissing
-{
+.episodeMissing, table.dataTable tr.series-ended {
     background-color: #f5d6d6;
 }
 
@@ -114,4 +114,13 @@ table.dataTable thead th.sorting_desc, table.dataTable thead th.sorting_asc, tab
 .paginate_enabled_previous:hover, .paginate_enabled_next:hover, .paginate_enabled_first:hover, .paginate_enabled_last:hover
 {
     opacity: 1;
+}
+
+/* Icon color when ignored */
+.ignored {
+    color: gray !important;
+}
+
+[data-status="Missing"] {
+    color: #B40404 !important;
 }

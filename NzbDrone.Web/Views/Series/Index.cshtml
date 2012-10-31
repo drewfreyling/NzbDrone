@@ -1,5 +1,4 @@
 @using NzbDrone.Web.Helpers
-@model string
 @{ViewBag.Title = "NzbDrone";}
 
 @section HeaderContent
@@ -7,8 +6,7 @@
     @Html.IncludeCss("Settings.css")
 }
 <style>  
-    .ui-progressbar
-    {
+    .progressbar {
         position:relative;
         width: 125px; 
         height: 20px;
@@ -17,22 +15,19 @@
         margin: 2px;
     }
     
-    .progressBarText 
-    {
+    .progressbar-text {
         position: absolute;
         display: block;
         width: 100%;
         text-align: center;
     }
 
-    .ui-progressbar-value
-    {
+    .ui-progressbar-value {
         overflow: hidden;
         border: 1px solid #065EFE;
     }
 
-    .ui-progressbar-value .progressBarText
-    {
+    .ui-progressbar-value .progressbar-text {
         position: relative;
         font-weight: normal;
         color: white;
@@ -47,6 +42,7 @@
     .commandsColumn, .statusColumn
     {
         text-align: center;
+        white-space: nowrap;
     }
     
     .ui-dialog-buttonpane .ui-dialog-buttonset .ui-delete-button
@@ -76,9 +72,7 @@
             <th style="width: 100px">Episodes</th>
         
             @*Commands Column*@
-            <th style="width: 80px">
-            
-            </th>
+            <th style="width: 80px"></th>
         </tr>
     </thead>
     <tbody>
@@ -103,16 +97,17 @@
 
     <script type="text/javascript">
         
-        var pauseImage = '<img src="../../Content/Images/pause.png" width="24" height="24" alt="Paused" title="Not monitored" />';
-        var stopImage = '<img src="../../Content/Images/stop.png" width="24" height="24" alt="Ended" title="Ended" />';
-        var playImage = '<img src="../../Content/Images/play.png" width="24" height="24" alt="Active" title="Continuing" />';
+        var pauseImage = '<i class="icon-pause grid-icon" title="Not Monitored"></i>';
+        var stopImage = '<i class="icon-stop grid-icon" title="Ended"></i>';
+        var playImage = '<i class="icon-play grid-icon" title="Continuing"></i>';
 
         $(document).ready(function () {
             $('#seriesGrid').removeClass('hidden-grid');
 
             oTable = $('.dataTablesGrid').dataTable({
+                "sAjaxSource": "/series/series",
+                "bServerSide": false,
                 "bShowAll": false,
-                "aaData": @Html.Raw(Model),
                 "bPaginate": false,
                 "bLengthChange": false,
                 "bFilter": false,
@@ -151,7 +146,7 @@
                                 { sWidth: 'auto', "mDataProp": function (source, type, val) {
                                                                         // 'display' and 'filter' use our fancy naming
                                                                         if (type === 'display' || type === 'filter') {
-                                                                            return "<a href='/Series/Details?seriesId=" + source["SeriesId"] + "'>" + source["Title"] + "</a>";
+                                                                            return "<a href='/series/details/" + source["SeriesId"] + "'>" + source["Title"] + "</a>";
                                                                         }
                                                                         // 'sort' and 'type' both just use the raw data
                                                                         return source["TitleSorter"];
@@ -173,17 +168,24 @@
                                         var progress = 100;
                                         if (row.aData["EpisodeCount"] > 0)
                                             progress = row.aData["EpisodeFileCount"] / row.aData["EpisodeCount"] * 100;
-                                        
-                                        var result = "<div class='progressBar' rel='" + progress + "'>" +
-                                                        "<span class='progressBarText'>" + row.aData["EpisodeFileCount"] + " / " + row.aData["EpisodeCount"] +"</span>" +
-                                                     "</div>";
 
-                                        return result;
+                                        var roundedProgress = Math.round(progress);
+                                        var progressbar =
+                                            '<div class="progressbar ui-progressbar ui-widget ui-widget-content ui-corner-all" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + roundedProgress + '" data-value="' + progress + '">' +
+                                                '<span class="progressbar-text">' + row.aData["EpisodeFileCount"] + ' / ' + row.aData["EpisodeCount"] + '</span>' +
+                                                '<div class="ui-progressbar-value ui-widget-header ui-corner-left" style="width: ' + roundedProgress + '%">' +
+                                                    '<span class="progressbar-text" style="width: 125px">' + row.aData["EpisodeFileCount"] + ' / ' + row.aData["EpisodeCount"] + '</span>' +
+                                                '</div>' +
+                                            '</div>';
+
+                                        return progressbar;
                                     }
                                 }, //Episodes
-                                { sWidth: '50px', "mDataProp": "HasBanner", "bSortable": false, "fnRender": function (row) {
-                                        return "<img src='../../Content/Images/settings.png' class='editButton gridAction' title = 'Edit Series' value='" + row.aData["SeriesId"] + "' rel='" + row.aData["Title"] + "' />" +
-                                                "<img src='../../Content/Images/close.png' class='deleteButton gridAction' title = 'Delete Series' value='" + row.aData["SeriesId"] + "' rel='" + row.aData["Title"] + "'/>";
+                                {
+                                    sClass: "commandsColumn",
+                                    sWidth: '50px', "mDataProp": "HasBanner", "bSortable": false, "fnRender": function (row) {
+                                        return "<i class='icon-cog editButton gridAction' title = 'Edit Series' data-series-id='" + row.aData["SeriesId"] + "' data-series-title='" + row.aData["Title"] + "' ></i> " +
+                                                "<i class='icon-remove deleteButton gridAction' title = 'Delete Series' data-series-id='" + row.aData["SeriesId"] + "' data-series-title='" + row.aData["Title"] + "'></i>";
                                     }
                                 }, //Commands
                                 { sWidth: '60px', "mDataProp": "Details", "bSortable": false, "bVisible": false, "fnRender": function (row) {
@@ -196,25 +198,17 @@
                             ],
                 "aaSorting": [[1, 'asc']],
                 "fnCreatedRow": function( nRow, aData, iDataIndex ) {
-                    $(nRow).addClass(aData["SeriesId"].toString());
+                    $(nRow).attr('data-series-id', aData["SeriesId"].toString());
+                },
+                "oLanguage": {
+                    "sEmptyTable": "No series have been added"
                 }
-            });
-
-            $(".progressBar").each(function () {
-                var element = this;
-
-                var progressbar = $(element).progressbar({
-                    value: parseInt($(element).attr("rel"))
-                });
-
-                var label = progressbar.find('.progressBarText').clone().width(progressbar.width());
-                progressbar.find('.ui-progressbar-value').append(label);
             });
         });
         
         //After we delete a series do this...
         function afterDelete(seriesId) {
-            var row = $('.' + seriesId);
+            var row = $('[data-series-id="' + seriesId + '"]');
             
             if ($(row).hasClass('details-opened')) {
                 var nextRow = $(row).next('tr');

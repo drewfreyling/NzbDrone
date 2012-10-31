@@ -1,6 +1,11 @@
 ﻿#top
 {
-    overflow: auto;
+    margin: 20px;
+    overflow: hidden;
+}
+
+#top .settingsForm {
+    float: left;
 }
 
 #profileContainer
@@ -14,6 +19,12 @@
     font-size:16px;
     color: black;
     font-weight:bold;
+    vertical-align: middle;
+}
+
+#addProfile > i {
+    color: green;
+    font-size: 20px;
 }
         
 #profileHeader
@@ -53,7 +64,7 @@
 .profileSection
 {
     float: left;
-    width: 270px;
+    width: 265px;
     margin: 2px;
     border:solid 1px #CCCCCD;
     display: inline-block;
@@ -68,7 +79,7 @@
     margin-right: 20px;
     font-weight: bold;
     display: inline-block;
-    width: 50px;
+    width: 40px;
 }
     
 .profileOptions input, .profileOptions select
@@ -97,11 +108,17 @@
     padding-left: 5px;
 }
     
-.deleteProfile
-{
+.delete-profile {
     position: absolute;
     top: 0px;
     right: 0px;
+    font-size: 16px;
+    color: #000000;
+    text-decoration: none;
+}
+
+.delete-profile > i[class*="icon-"]:hover {
+    cursor: pointer !important;
 }
     
 .titleText
@@ -130,7 +147,6 @@
     width: 600px;
 }
 
-.slider-container
-{
-    margin-bottom: 10px;
+#QualityForm .ui-accordion .ui-accordion-content {
+    padding: 1em 2em;
 }

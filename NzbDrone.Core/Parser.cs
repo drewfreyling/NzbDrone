@@ -74,8 +74,16 @@ namespace NzbDrone.Core
         private static readonly Regex ReportSizeRegex = new Regex(@"(?<value>\d+\.\d{1,2}|\d+\,\d+\.\d{1,2})\W?(?<unit>GB|MB|GiB|MiB)",
                                                               RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly Regex HeaderRegex = new Regex(@"(?:\[.+\]\-\[.+\]\-\[.+\]\-\[)(?<nzbTitle>.+)(?:\]\-.+)",
-                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex[] HeaderRegex = new[]
+                                                          {
+                                                                new Regex(@"(?:\[.+\]\-\[.+\]\-\[.+\]\-\[)(?<nzbTitle>.+)(?:\]\-.+)",
+                                                                        RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+                                                                new Regex(@"(?:\[)(?<nzbTitle>.+)(?:\]\-.+)",
+                                                                        RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                                                          };
+
+        private static readonly Regex MultiPartCleanupRegex = new Regex(@"\(\d+\)$", RegexOptions.Compiled);
 
         internal static EpisodeParseResult ParsePath(string path)
         {
@@ -245,18 +253,18 @@ namespace NzbDrone.Core
             return NormalizeTitle(title);
         }
 
-        internal static Quality ParseQuality(string name)
+        internal static QualityModel ParseQuality(string name)
         {
             Logger.Trace("Trying to parse quality for {0}", name);
 
             name = name.Trim();
             var normalizedName = NormalizeTitle(name);
-            var result = new Quality { QualityType = QualityTypes.Unknown };
+            var result = new QualityModel { Quality = QualityTypes.Unknown };
             result.Proper = (normalizedName.Contains("proper") || normalizedName.Contains("repack"));
 
             if (normalizedName.Contains("dvd") || normalizedName.Contains("bdrip") || normalizedName.Contains("brrip"))
             {
-                result.QualityType = QualityTypes.DVD;
+                result.Quality = QualityTypes.DVD;
                 return result;
             }
 
@@ -264,11 +272,11 @@ namespace NzbDrone.Core
             {
                 if (normalizedName.Contains("bluray"))
                 {
-                    result.QualityType = QualityTypes.DVD;
+                    result.Quality = QualityTypes.DVD;
                     return result;
                 }
 
-                result.QualityType = QualityTypes.SDTV;
+                result.Quality = QualityTypes.SDTV;
                 return result;
             }
 
@@ -276,32 +284,37 @@ namespace NzbDrone.Core
             {
                 if (normalizedName.Contains("720p"))
                 {
-                    result.QualityType = QualityTypes.Bluray720p;
+                    result.Quality = QualityTypes.Bluray720p;
                     return result;
                 }
 
                 if (normalizedName.Contains("1080p"))
                 {
-                    result.QualityType = QualityTypes.Bluray1080p;
+                    result.Quality = QualityTypes.Bluray1080p;
                     return result;
                 }
 
-                result.QualityType = QualityTypes.Bluray720p;
+                result.Quality = QualityTypes.Bluray720p;
                 return result;
             }
             if (normalizedName.Contains("webdl"))
             {
-                result.QualityType = QualityTypes.WEBDL;
+                if (normalizedName.Contains("1080p"))
+                {
+                    result.Quality = QualityTypes.WEBDL1080p;
+                    return result;
+                }
+                result.Quality = QualityTypes.WEBDL720p;
                 return result;
             }
             if (normalizedName.Contains("x264") || normalizedName.Contains("h264") || normalizedName.Contains("720p"))
             {
-                result.QualityType = QualityTypes.HDTV;
+                result.Quality = QualityTypes.HDTV;
                 return result;
             }
             //Based on extension
 
-            if (result.QualityType == QualityTypes.Unknown)
+            if (result.Quality == QualityTypes.Unknown)
             {
                 try
                 {
@@ -322,13 +335,13 @@ namespace NzbDrone.Core
                         case ".ogm":
                         case ".strm":
                             {
-                                result.QualityType = QualityTypes.SDTV;
+                                result.Quality = QualityTypes.SDTV;
                                 break;
                             }
                         case ".mkv":
                         case ".ts":
                             {
-                                result.QualityType = QualityTypes.HDTV;
+                                result.Quality = QualityTypes.HDTV;
                                 break;
                             }
                     }
@@ -342,15 +355,15 @@ namespace NzbDrone.Core
 
             if (name.Contains("[HDTV]"))
             {
-                result.QualityType = QualityTypes.HDTV;
+                result.Quality = QualityTypes.HDTV;
                 return result;
             }
 
             if ((normalizedName.Contains("sdtv") || normalizedName.Contains("pdtv") ||
-                (result.QualityType == QualityTypes.Unknown && normalizedName.Contains("hdtv"))) &&
+                (result.Quality == QualityTypes.Unknown && normalizedName.Contains("hdtv"))) &&
                 !normalizedName.Contains("mpeg"))
             {
-                result.QualityType = QualityTypes.SDTV;
+                result.Quality = QualityTypes.SDTV;
                 return result;
             }
 
@@ -480,12 +493,21 @@ namespace NzbDrone.Core
 
         internal static string ParseHeader(string header)
         {
-            var match = HeaderRegex.Matches(header);
+            foreach(var regex in HeaderRegex)
+            {
+                var match = regex.Matches(header);
 
-            if (match.Count != 0)
-                return match[0].Groups["nzbTitle"].Value;
+                if (match.Count != 0)
+                    return match[0].Groups["nzbTitle"].Value.Trim();
+            }
 
             return header;
+        }
+
+        internal static string CleanupEpisodeTitle(string title)
+        {
+            //this will remove (1),(2) from the end of multi part episodes.
+            return MultiPartCleanupRegex.Replace(title, string.Empty).Trim();
         }
     }
 }

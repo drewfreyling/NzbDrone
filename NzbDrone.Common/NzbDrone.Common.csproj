@@ -34,10 +34,25 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Exceptioneer.WindowsFormsClient">
-      <HintPath>..\Libraries\Exceptioneer.WindowsFormsClient.dll</HintPath>
-    </Reference>
     <Reference Include="Exceptron.Client, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Exceptron.Client.1.0.7\lib\net20\Exceptron.Client.dll</HintPath>
@@ -74,7 +89,6 @@
     <Compile Include="PathExtentions.cs" />
     <Compile Include="DiskProvider.cs" />
     <Compile Include="EnvironmentProvider.cs" />
-    <Compile Include="NlogTargets\ExceptioneerTarget.cs" />
     <Compile Include="LogConfiguration.cs" />
     <Compile Include="Model\ProcessInfo.cs" />
     <Compile Include="ProcessProvider.cs" />

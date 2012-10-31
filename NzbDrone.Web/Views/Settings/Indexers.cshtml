@@ -1,14 +1,16 @@
 ﻿@using NzbDrone.Web.Helpers
 @model NzbDrone.Web.Models.IndexerSettingsModel
-@{ Layout = null;  }
+
+@{
+    Layout = "_SettingsLayout.cshtml";
+}
 
 <style>
     .indexerStatusContainer {
         margin-left: 14px;
     }
 </style>
-<div class="infoBox">
-    RSS feeds are checked every 25 minutes for new episodes.</div>
+
 <div class="indexerStatusContainer">
     @Html.CheckBox("nzbMatrixStatus", @Model.NzbMatrixEnabled, new { @class = "indexerStatusButton" })
     <label for="nzbMatrixStatus">NZBMatrix</label>
@@ -37,7 +39,7 @@
 <div id="stylized">
     @using (Html.BeginForm("SaveIndexers", "Settings", FormMethod.Post, new { id = "IndexersForm", name = "IndexersForm", @class = "settingsForm" }))
     {     
-        <div class="jquery-accordion">
+        <div class="jquery-accordion jquery-accordion-collapse-all">
             <h3><a href="#">NZBMatrix</a></h3>
             <div class="indexerPanel">
                 <label class="labelClass">
@@ -160,20 +162,28 @@
             </div>
         </div>
         
-        <div class="retentionContainer">
+        <div class="indexer-global-settings">
             @Html.ValidationSummary(true, "Unable to save your settings. Please correct the errors and try again.")
             <label class="labelClass">@Html.LabelFor(m => m.Retention)
                 <span class="small">@Html.DescriptionFor(m => m.Retention)</span>
                 <span class="small">@Html.ValidationMessageFor(m => m.Retention)</span>
             </label>
             @Html.TextBoxFor(m => m.Retention, new { @class = "inputClass" })
+            
+            <label class="labelClass">@Html.LabelFor(m => m.RssSyncInterval)
+                <span class="small">@Html.DescriptionFor(m => m.RssSyncInterval)</span>
+                <span class="small">@Html.ValidationMessageFor(m => m.RssSyncInterval)</span>
+            </label>
+            @Html.TextBoxFor(m => m.RssSyncInterval, new { @class = "inputClass" })
         </div>
         
         <button type="submit" class="save_button" disabled="disabled">Save</button>
     }
 </div>
 
-<script type="text/javascript">
+@section Scripts
+{
+    <script type="text/javascript">
     $(document).ready(function () {
         //Allow unobstrusive validation of the AJAX loaded form
         $.validator.unobtrusive.parse("#IndexersForm");
@@ -314,3 +324,4 @@
         $("#title_" + profileId).text(value);
     }).keyup();
   </script>
+}

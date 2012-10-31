@@ -1,17 +1,11 @@
-﻿var notIgnoredImage = '../../Content/Images/notIgnored.png';
-var ignoredImage = '../../Content/Images/ignored.png';
-var notAiredImage = '../../Content/Images/NotAired.png';
-var readyImage = '../../Content/Images/Ready.png';
-var downloadingImage = '../../Content/Images/Downloading.png';
-
-var seriesId = 0;
-var saveSeasonIgnoreUrl = '../Command/SaveSeasonIgnore';
-var saveEpisodeIgnoreUrl = '../Command/SaveEpisodeIgnore';
+﻿var seriesId = 0;
+var saveSeasonIgnoreUrl = '/command/saveseasonignore';
+var saveEpisodeIgnoreUrl = '/command/saveepisodeignore';
 
 var changeQualityType;
 var changeQualityData;
-var changeEpisodeQualityUrl = '../Episode/ChangeEpisodeQuality';
-var changeSeasonQualityUrl = '../Episode/ChangeSeasonQuality';
+var changeEpisodeQualityUrl = '/episode/changeepisodequality';
+var changeSeasonQualityUrl = '/episode/changeseasonquality';
 
 //Episode Ignore Functions
 $(".ignoreEpisode").live("click", function () {
@@ -20,13 +14,11 @@ $(".ignoreEpisode").live("click", function () {
 
     if (ignored) {
         toggle.removeClass('ignored');
-        toggle.attr('src', notIgnoredImage);
         toggleCellColour(toggle, false);
     }
 
     else {
         toggle.addClass('ignored');
-        toggle.attr('src', ignoredImage);
         toggleCellColour(toggle, true);
     }
 
@@ -36,7 +28,7 @@ $(".ignoreEpisode").live("click", function () {
     ignored = !ignored;
 
     if (toggle.hasClass('ignoredEpisodesMaster')) {
-        seasonNumber = toggle.attr('class').split(/\s+/)[2].replace('ignoreSeason_', '');
+        seasonNumber = toggle.attr('data-season');
 
         toggleChildren(seasonNumber, ignored);
         toggleMasters(seasonNumber, ignored);
@@ -45,18 +37,17 @@ $(".ignoreEpisode").live("click", function () {
 
     else {
         //Check to see if this is the last one ignored or the first not ignored
-        var episodeId = toggle.attr('id');
+        var episodeId = toggle.attr('data-episode-id');
         saveEpisodeIgnore(episodeId, ignored);
     }
 });
 
 function toggleChildren(seasonNumber, ignored) {
-    var ignoreEpisodes = $('.ignoreEpisode_' + seasonNumber);
+    var ignoreEpisodes = $('[data-season="' + seasonNumber + '"]:not(table)');
 
     if (ignored) {
         ignoreEpisodes.each(function (index) {
             $(this).addClass('ignored');
-            $(this).attr('src', ignoredImage);
             toggleCellColour($(this), true);
         });
     }
@@ -64,7 +55,6 @@ function toggleChildren(seasonNumber, ignored) {
     else {
         ignoreEpisodes.each(function (index) {
             $(this).removeClass('ignored');
-            $(this).attr('src', notIgnoredImage);
 
             toggleCellColour($(this), false);
         });
@@ -78,14 +68,12 @@ function toggleMasters(seasonNumber, ignored) {
     if (ignored) {
         masters.each(function (index) {
             $(this).addClass('ignored');
-            $(this).attr('src', ignoredImage);
         });
     }
 
     else {
         masters.each(function (index) {
             $(this).removeClass('ignored');
-            $(this).attr('src', notIgnoredImage);
         });
     }
 }
@@ -100,7 +88,7 @@ function toggleCellColour(toggle, ignored) {
         toggle.parent('td').removeClass('episodeIgnored');
 
         //check to see if episode is missing
-        if (toggle.parent('td').children('.statusImage').hasClass('status-Missing'))
+        if (toggle.parent('td').children('.statusImage').attr('data-status') === 'Missing')
             toggle.parent('td').addClass('episodeMissing');
     }
 }
@@ -111,9 +99,6 @@ function saveSeasonIgnore(seasonNumber, ignored) {
         type: "POST",
         url: saveSeasonIgnoreUrl,
         data: jQuery.param({ seriesId: seriesId, seasonNumber: seasonNumber, ignored: ignored }),
-        error: function (req, status, error) {
-            alert("Sorry! We could save the ignore settings for Series: " + seriesId + ", Season: " + seasonNumber + " at this time. " + error);
-        }
     });
 }
 
@@ -122,9 +107,6 @@ function saveEpisodeIgnore(episodeId, ignored) {
         type: "POST",
         url: saveEpisodeIgnoreUrl,
         data: jQuery.param({ episodeId: episodeId, ignored: ignored }),
-        error: function (req, status, error) {
-            alert("Sorry! We could save the ignore settings for Episode: " + episodeId + " at this time. " + error);
-        }
     });
 }
 

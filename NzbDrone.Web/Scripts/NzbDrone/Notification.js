@@ -16,7 +16,7 @@
                 $.gritter.add({
                     title: data.Title,
                     text: data.Text,
-                    image: '../../content/images/success.png',
+                    icon: 'icon-info-sign',
                     class_name: 'gritter-success'
                 });
             }
@@ -24,7 +24,7 @@
                 $.gritter.add({
                     title: data.Title,
                     text: data.Text,
-                    image: '../../content/images/error.png',
+                    icon: 'icon-minus-sign',
                     class_name: 'gritter-fail',
                     time: 10000
                 });
@@ -37,11 +37,10 @@
             if (this.url.indexOf("/notification/Comet") === 0 || this.url.indexOf("/Health/Index") === 0 || this.url.indexOf("/signalr") === 0)
                 return;
 
-            alert("Status: " + textStatus + ", Error: " + thrownError);
             $.gritter.add({
                 title: 'Request failed',
-                text: this.url,
-                image: '../../content/images/error.png',
+                text: 'Url: ' + this.url + '<br/>Error: ' + thrownError,
+                icon: 'icon-minus-sign',
                 class_name: 'gritter-fail',
                 time: 10000
             });

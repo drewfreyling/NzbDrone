@@ -5,6 +5,7 @@ using NLog;
 using NzbDrone.Core.Model.Notification;
 using NzbDrone.Core.Providers;
 using NzbDrone.Core.Providers.Converting;
+using NzbDrone.Core.Repository;
 
 namespace NzbDrone.Core.Jobs
 {
@@ -35,12 +36,13 @@ namespace NzbDrone.Core.Jobs
             get { return TimeSpan.FromTicks(0); }
         }
 
-        public void Start(ProgressNotification notification, int targetId, int secondaryTargetId)
+        public void Start(ProgressNotification notification, dynamic options)
         {
-            if (targetId <= 0)
-                throw new ArgumentOutOfRangeException("targetId");
 
-            var episode = _episodeProvider.GetEpisode(targetId);
+            if (options == null || options.EpisodeId <= 0)
+                throw new ArgumentNullException(options);
+
+            Episode episode = _episodeProvider.GetEpisode(options.EpisodeId);
             notification.CurrentMessage = String.Format("Starting Conversion for {0}", episode);
             var outputFile = _handbrakeProvider.ConvertFile(episode, notification);
 

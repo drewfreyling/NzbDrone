@@ -12,11 +12,22 @@ $(document).on("click", "#addProfile", function (event) {
     event.preventDefault();
 });
 
-function deleteProfile(id) {
-    sendToServer(id);
-    var profileDiv = '#profile_' + id;
-    $(profileDiv).remove();
-}
+$(document).on('click', '.delete-profile', function (e) {
+    var container = $(this).closest('.profileSection');
+    var id = $(container).attr('data-profile-id');
+
+    $.ajax({
+        type: "POST",
+        url: deleteQualityProfileUrl,
+        data: jQuery.param({ profileId: id }),
+        success: function (data, textStatus, jqXHR) {
+            $(container).remove();
+            removeOption(id);
+        }
+    });
+    
+    e.preventDefault();
+});
 
 function renameOption(text, value) {
     $("#DefaultQualityProfileId option[value='" + value + "']").html(text);
@@ -35,30 +46,9 @@ function removeOption(value) {
     $("#DefaultQualityProfileId option[value='" + value + "']").remove();
 }
 
-function sendToServer(id) {
-    $.ajax({
-        type: "POST",
-        url: deleteQualityProfileUrl,
-        data: jQuery.param({ profileId: id }),
-        error: function (req, status, error) {
-            alert("Sorry! We could not delete your Profile at this time. " + error);
-        },
-        success: function (data, textStatus, jqXHR) {
-            if (data == "ok") {
-                $("#profile_" + id).remove();
-                removeOption(id);
-            }
-
-            else {
-                alert(data);
-            }
-        }
-    });
-}
-
 function getProfileId(obj) {
-    var parentProfileSection = $(obj).parents('.profileSection');
-    return parentProfileSection.children('.qualityProfileId').val();
+    var parentProfileSection = $(obj).closest('.profileSection');
+    return parentProfileSection.attr('data-profile-id');
 }
 
 function getCleanId(obj) {
@@ -68,8 +58,10 @@ function getCleanId(obj) {
 
 $(document).on('keyup', '.profileName_textbox', function () {
     var value = $(this).val();
+
+    $(this).closest('.profileSection').find('.titleText').text(value);
     var profileId = getProfileId(this);
-    $("#title_" + profileId).text(value);
+    
     renameOption(value, profileId);
 }).keyup();
 
@@ -78,21 +70,19 @@ $(document).on('click', '.quality-selectee', function () {
     var cleanId = getCleanId(this);
     var cutoff = '#' + cleanId + '_Cutoff';
     var name = jQuery('[for="' + id + '"]').children('.ui-button-text').text();
+    var qualityId = $(this).attr('data-quality-id');
 
     //Remove 'Unknown'
     $(cutoff + ' option').each(function () { if ($(this).text().indexOf('Unknown') > -1) $(cutoff + ' option').remove(':contains("' + $(this).text() + '")'); });
 
     //Add option to cutoff SelectList
     if ($(this).attr('checked')) {
-        $('<option>' + name + '</option>').appendTo(cutoff);
+        $('<option>' + name + '</option>').val(qualityId).appendTo(cutoff);
     }
 
     //Remove option from cutoff SelectList
     else {
-        $(cutoff + ' option').each(function () {
-            if ($(this).text().indexOf(name) > -1)
-                $(cutoff + ' option').remove(':contains("' + $(this).text() + '")');
-        });
+        $(cutoff).find('option[value="' + qualityId + '"]').remove();
     }
 });
 

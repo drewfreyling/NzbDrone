@@ -18,11 +18,14 @@ namespace NzbDrone.Web.Controllers
         private readonly GrowlProvider _growlProvider;
         private readonly SeasonProvider _seasonProvider;
         private readonly ProwlProvider _prowlProvider;
+        private readonly XbmcProvider _xbmcProvider;
+        private readonly PlexProvider _plexProvider;
 
         public CommandController(JobProvider jobProvider, SabProvider sabProvider,
                                     SmtpProvider smtpProvider, TwitterProvider twitterProvider,
                                     EpisodeProvider episodeProvider, GrowlProvider growlProvider,
-                                    SeasonProvider seasonProvider, ProwlProvider prowlProvider)
+                                    SeasonProvider seasonProvider, ProwlProvider prowlProvider,
+                                    XbmcProvider xbmcProvider, PlexProvider plexProvider)
         {
             _jobProvider = jobProvider;
             _sabProvider = sabProvider;
@@ -32,6 +35,8 @@ namespace NzbDrone.Web.Controllers
             _growlProvider = growlProvider;
             _seasonProvider = seasonProvider;
             _prowlProvider = prowlProvider;
+            _xbmcProvider = xbmcProvider;
+            _plexProvider = plexProvider;
         }
 
         public JsonResult RssSync()
@@ -60,9 +65,9 @@ namespace NzbDrone.Web.Controllers
 
         public JsonResult ForceRefresh(int seriesId)
         {
-            _jobProvider.QueueJob(typeof(UpdateInfoJob), seriesId);
-            _jobProvider.QueueJob(typeof(DiskScanJob), seriesId);
-            _jobProvider.QueueJob(typeof(RefreshEpisodeMetadata), seriesId);
+            _jobProvider.QueueJob(typeof(UpdateInfoJob), new { SeriesId = seriesId });
+            _jobProvider.QueueJob(typeof(DiskScanJob), new { SeriesId = seriesId });
+            _jobProvider.QueueJob(typeof(RefreshEpisodeMetadata), new { SeriesId = seriesId });
 
             return JsonNotificationResult.Queued("Episode update/Disk scan");
         }
@@ -133,6 +138,7 @@ namespace NzbDrone.Web.Controllers
         }
 
         [HttpPost]
+        [JsonErrorFilter]
         public EmptyResult SaveSeasonIgnore(int seriesId, int seasonNumber, bool ignored)
         {
             _seasonProvider.SetIgnore(seriesId, seasonNumber, ignored);
@@ -140,6 +146,7 @@ namespace NzbDrone.Web.Controllers
         }
 
         [HttpPost]
+        [JsonErrorFilter]
         public EmptyResult SaveEpisodeIgnore(int episodeId, bool ignored)
         {
             _episodeProvider.SetEpisodeIgnore(episodeId, ignored);
@@ -161,6 +168,62 @@ namespace NzbDrone.Web.Controllers
                 return JsonNotificationResult.Oops("Failed to connect to SABnzbd, please check your settings");
 
             return JsonNotificationResult.Info("Success!", "SABnzbd settings have been verified successfully! Version: " + version);
+        }
+
+        public JsonResult TestXbmcNotification(string hosts)
+        {
+            try
+            {
+                _xbmcProvider.TestNotification(hosts);
+                return JsonNotificationResult.Info("Success!", "Test Notification sent successfully");
+            }
+            catch(Exception)
+            {
+            }
+
+            return JsonNotificationResult.Oops("Failed to send test notification, please review your settings.");
+        }
+
+        public JsonResult TestXbmcJsonApi(string hosts, string username, string password)
+        {
+            try
+            {
+                _xbmcProvider.TestJsonApi(hosts, username, password);
+                return JsonNotificationResult.Info("Success!", "Successfully tested JSON API");
+            }
+            catch (Exception)
+            {
+            }
+
+            return JsonNotificationResult.Oops("Failed to test JSON API, please review your settings.");
+        }
+
+        public JsonResult TestPlexNotification(string hosts, string username, string password)
+        {
+            try
+            {
+                _plexProvider.TestNotification(hosts, username, password);
+                return JsonNotificationResult.Info("Success!", "Test Notification sent successfully");
+            }
+            catch (Exception)
+            {
+            }
+
+            return JsonNotificationResult.Oops("Failed to send test notification, please review your settings.");
+        }
+
+        public JsonResult TestPlexServer(string host)
+        {
+            try
+            {
+                _plexProvider.GetSectionKeys(host);
+                return JsonNotificationResult.Info("Success!", "Successfully tested Server settings");
+            }
+            catch (Exception)
+            {
+            }
+
+            return JsonNotificationResult.Oops("Failed to connect to server, please review your settings.");
         }
     }
 }

@@ -45,7 +45,7 @@
             $('#historyGrid').removeClass('hidden-grid');
 
             oTable = $('#historyGrid').dataTable({
-                "sAjaxSource": "History/AjaxBinding",
+                "sAjaxSource": "/history/ajaxbinding",
                 "bServerSide": true,
                 "bProcessing": true,
                 "bShowAll": false,
@@ -94,8 +94,8 @@
                                     }
                                 }, //Date
                                 { sName: 'Actions', sWidth: '40px', "mDataProp": "HistoryId", "bSortable": false, "bSearchable": false, "fnRender": function (row) {
-                                    var deleteImage = "<img src=\"../../Content/Images/close.png\" alt=\"Delete\" title=\"Delete from History\" class=\"gridAction\" onclick=\"deleteHistory(this.parentNode.parentNode, " + row.aData["HistoryId"] + ")\">";
-                                    var redownloadImage = "<img src=\"../../Content/Images/redownload.png\" alt=\"Redownload\" title=\Redownload Episode\" class=\"gridAction\" onclick=\"redownloadHistory(this.parentNode.parentNode, " + row.aData["HistoryId"] + ", " + row.aData["EpisodeId"] + ")\">";
+                                    var deleteImage = '<i class="icon-remove gridAction" title="Delete from History" onclick="deleteHistory(this.parentNode.parentNode, ' + row.aData["HistoryId"] + ')"></i>';
+                                    var redownloadImage = '<i class="icon-repeat gridAction" title="Redownload Episode" onclick="redownloadHistory(this.parentNode.parentNode, ' + row.aData["HistoryId"] + ', ' + row.aData["EpisodeId"] + ')"></i>';
 
                                     return deleteImage + redownloadImage;
                                 }
@@ -122,7 +122,11 @@
                         }
                     } //Details
                 ],
-                    "aaSorting": [[5, 'desc']]
+                "aaSorting": [[5, 'desc']],
+                "oLanguage": {
+                    "sEmptyTable": "Nothing has been downloaded, or results have been purged",
+                    "sZeroRecords": "No items match the filter"
+                }
             }).fnSetFilteringDelay(500);
         });
 

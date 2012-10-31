@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Model
 
         public DateTime? AirDate { get; set; }
 
-        public Quality Quality { get; set; }
+        public QualityModel Quality { get; set; }
 
         public LanguageType Language { get; set; }
 
@@ -45,6 +45,10 @@ namespace NzbDrone.Core.Model
         public int Age { get; set; }
 
         public string ReleaseGroup { get; set; }
+
+        public bool SceneSource { get; set; }
+
+        public IList<Episode> Episodes { get; set; } 
 
         public override string ToString()
         {

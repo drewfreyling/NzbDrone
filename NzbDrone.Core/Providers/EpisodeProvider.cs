@@ -16,22 +16,17 @@ namespace NzbDrone.Core.Providers
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        //this will remove (1),(2) from the end of multi part episodes.
-        private static readonly Regex multiPartCleanupRegex = new Regex(@"\(\d+\)$", RegexOptions.Compiled);
-
         private readonly TvDbProvider _tvDbProvider;
         private readonly SeasonProvider _seasonProvider;
         private readonly IDatabase _database;
-        private readonly SeriesProvider _seriesProvider;
 
         [Inject]
-        public EpisodeProvider(IDatabase database, SeriesProvider seriesProvider,
-            TvDbProvider tvDbProviderProvider, SeasonProvider seasonProvider)
+        public EpisodeProvider(IDatabase database, TvDbProvider tvDbProviderProvider,
+                SeasonProvider seasonProvider)
         {
             _tvDbProvider = tvDbProviderProvider;
             _seasonProvider = seasonProvider;
             _database = database;
-            _seriesProvider = seriesProvider;
         }
 
         public EpisodeProvider()
@@ -193,11 +188,20 @@ namespace NzbDrone.Core.Providers
 
             foreach (var episodeNumber in parseResult.EpisodeNumbers)
             {
-                var episodeInfo = GetEpisode(parseResult.Series.SeriesId, parseResult.SeasonNumber, episodeNumber);
-                if (episodeInfo == null && parseResult.AirDate != null)
+                Episode episodeInfo = null;
+
+                if (parseResult.SceneSource && parseResult.Series.UseSceneNumbering)
+                    episodeInfo = GetEpisodeBySceneNumbering(parseResult.Series.SeriesId, parseResult.SeasonNumber, episodeNumber);
+
+                if (episodeInfo == null)
                 {
-                    episodeInfo = GetEpisode(parseResult.Series.SeriesId, parseResult.AirDate.Value);
+                    episodeInfo = GetEpisode(parseResult.Series.SeriesId, parseResult.SeasonNumber, episodeNumber);
+                    if (episodeInfo == null && parseResult.AirDate != null)
+                    {
+                        episodeInfo = GetEpisode(parseResult.Series.SeriesId, parseResult.AirDate.Value);
+                    }
                 }
+                
                 //if still null we should add the temp episode
                 if (episodeInfo == null && autoAddNew)
                 {
@@ -222,13 +226,23 @@ namespace NzbDrone.Core.Providers
                 {
                     result.Add(episodeInfo);
 
+                    if (parseResult.Series.UseSceneNumbering)
+                    {
+                        logger.Info("Using Scene to TVDB Mapping for: {0} - Scene: {1}x{2:00} - TVDB: {3}x{4:00}",
+                                    parseResult.Series.Title,
+                                    episodeInfo.SceneSeasonNumber,
+                                    episodeInfo.SceneEpisodeNumber,
+                                    episodeInfo.SeasonNumber,
+                                    episodeInfo.EpisodeNumber);
+                    }
+
                     if (parseResult.EpisodeNumbers.Count == 1)
                     {
                         parseResult.EpisodeTitle = episodeInfo.Title.Trim();
                     }
                     else
                     {
-                        parseResult.EpisodeTitle = multiPartCleanupRegex.Replace(episodeInfo.Title, string.Empty).Trim();
+                        parseResult.EpisodeTitle = Parser.CleanupEpisodeTitle(episodeInfo.Title);
                     }
                 }
                 else
@@ -322,10 +336,21 @@ namespace NzbDrone.Core.Providers
                         updateList.Add(episodeToUpdate);
                     }
 
+                    if ((episodeToUpdate.EpisodeNumber != episode.EpisodeNumber || 
+                        episodeToUpdate.SeasonNumber != episode.SeasonNumber) && 
+                        episodeToUpdate.EpisodeFileId > 0)
+                    {
+                        logger.Info("Unlinking episode file because TheTVDB changed the epsiode number...");
+
+                        _database.Delete<EpisodeFile>(episodeToUpdate.EpisodeFileId);
+                        episodeToUpdate.EpisodeFileId = 0;
+                    }
+
                     episodeToUpdate.SeriesId = series.SeriesId;
                     episodeToUpdate.TvDbEpisodeId = episode.Id;
                     episodeToUpdate.EpisodeNumber = episode.EpisodeNumber;
                     episodeToUpdate.SeasonNumber = episode.SeasonNumber;
+                    episodeToUpdate.AbsoluteEpisodeNumber = episode.AbsoluteNumber;
                     episodeToUpdate.Title = episode.EpisodeName;
 
                     episodeToUpdate.Overview = episode.Overview.Truncate(3500);
@@ -428,6 +453,27 @@ namespace NzbDrone.Core.Providers
 
             logger.Trace("Updating PostDownloadStatus for all episodeIds in {0}", episodeIdString);
             _database.Execute(episodeIdQuery);
+        }
+
+        public virtual void UpdateEpisodes(List<Episode> episodes)
+        {
+            _database.UpdateMany(episodes);
+        }
+
+        public virtual Episode GetEpisodeBySceneNumbering(int seriesId, int seasonNumber, int episodeNumber)
+        {
+            var episode = _database.Fetch<Episode, Series, EpisodeFile>(@"SELECT * FROM Episodes 
+                                                            INNER JOIN Series ON Episodes.SeriesId = Series.SeriesId
+                                                            LEFT JOIN EpisodeFiles ON Episodes.EpisodeFileId = EpisodeFiles.EpisodeFileId
+                                                            WHERE Episodes.SeriesId = @0 AND Episodes.SceneSeasonNumber = @1 AND Episodes.SceneEpisodeNumber = @2", seriesId, seasonNumber, episodeNumber).SingleOrDefault();
+
+            if (episode == null)
+                return null;
+
+            if (episode.EpisodeFileId == 0)
+                episode.EpisodeFile = null;
+
+            return episode;
         }
     }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      

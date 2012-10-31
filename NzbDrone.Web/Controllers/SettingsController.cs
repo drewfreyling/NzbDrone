@@ -6,6 +6,7 @@ using NLog;
 using NzbDrone.Common;
 using NzbDrone.Common.Model;
 using NzbDrone.Core.Helpers;
+using NzbDrone.Core.Jobs;
 using NzbDrone.Core.Model;
 using NzbDrone.Core.Providers;
 using NzbDrone.Core.Providers.Core;
@@ -15,13 +16,13 @@ using NzbDrone.Core.Repository;
 using NzbDrone.Core.Repository.Quality;
 using NzbDrone.Web.Filters;
 using NzbDrone.Web.Models;
+using QualityModel = NzbDrone.Web.Models.QualityModel;
 
 namespace NzbDrone.Web.Controllers
 {
     [HandleError]
     public class SettingsController : Controller
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ConfigProvider _configProvider;
         private readonly IndexerProvider _indexerProvider;
         private readonly QualityProvider _qualityProvider;
@@ -32,18 +33,23 @@ namespace NzbDrone.Web.Controllers
         private readonly ConfigFileProvider _configFileProvider;
         private readonly NewznabProvider _newznabProvider;
         private readonly MetadataProvider _metadataProvider;
+        private readonly JobProvider _jobProvider;
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public SettingsController(ConfigProvider configProvider, IndexerProvider indexerProvider,
                                     QualityProvider qualityProvider, AutoConfigureProvider autoConfigureProvider,
                                     SeriesProvider seriesProvider, ExternalNotificationProvider externalNotificationProvider,
                                     QualityTypeProvider qualityTypeProvider, ConfigFileProvider configFileProvider, 
-                                    NewznabProvider newznabProvider, MetadataProvider metadataProvider)
+                                    NewznabProvider newznabProvider, MetadataProvider metadataProvider,
+                                    JobProvider jobProvider)
         {
             _externalNotificationProvider = externalNotificationProvider;
             _qualityTypeProvider = qualityTypeProvider;
             _configFileProvider = configFileProvider;
             _newznabProvider = newznabProvider;
             _metadataProvider = metadataProvider;
+            _jobProvider = jobProvider;
             _configProvider = configProvider;
             _indexerProvider = indexerProvider;
             _qualityProvider = qualityProvider;
@@ -54,7 +60,33 @@ namespace NzbDrone.Web.Controllers
 
         public ActionResult Index()
         {
-            return View();
+            return RedirectToAction("Naming", "Settings");
+        }
+
+        public ActionResult Naming()
+        {
+            var model = new EpisodeNamingModel();
+
+            model.SeriesName = _configProvider.SortingIncludeSeriesName;
+            model.EpisodeName = _configProvider.SortingIncludeEpisodeTitle;
+            model.ReplaceSpaces = _configProvider.SortingReplaceSpaces;
+            model.AppendQuality = _configProvider.SortingAppendQuality;
+            model.SeasonFolders = _configProvider.UseSeasonFolder;
+            model.SeasonFolderFormat = _configProvider.SortingSeasonFolderFormat;
+            model.SeparatorStyle = _configProvider.SortingSeparatorStyle;
+            model.NumberStyle = _configProvider.SortingNumberStyle;
+            model.MultiEpisodeStyle = _configProvider.SortingMultiEpisodeStyle;
+            model.SceneName = _configProvider.SortingUseSceneName;
+
+            model.SeparatorStyles = new SelectList(EpisodeSortingHelper.GetSeparatorStyles(), "Id", "Name");
+            model.NumberStyles = new SelectList(EpisodeSortingHelper.GetNumberStyles(), "Id", "Name");
+            model.MultiEpisodeStyles = new SelectList(EpisodeSortingHelper.GetMultiEpisodeStyles(), "Id", "Name");
+
+            //Metadata
+            model.MetadataXbmcEnabled = _metadataProvider.GetSettings(typeof(Core.Providers.Metadata.Xbmc)).Enable;
+            model.MetadataUseBanners = _configProvider.MetadataUseBanners;
+
+            return View(model);
         }
 
         public ActionResult Indexers()
@@ -83,6 +115,8 @@ namespace NzbDrone.Web.Controllers
                                 FileSharingTalkEnabled = _indexerProvider.GetSettings(typeof(FileSharingTalk)).Enable,
                                 NzbIndexEnabled = _indexerProvider.GetSettings(typeof(NzbIndex)).Enable,
                                 NzbClubEnabled = _indexerProvider.GetSettings(typeof(NzbClub)).Enable,
+
+                                RssSyncInterval = _configProvider.RssSyncInterval,
 
                                 NewznabDefinitions = _newznabProvider.All(),
                             });
@@ -120,7 +154,7 @@ namespace NzbDrone.Web.Controllers
 
         public ActionResult Quality()
         {
-            var profiles = _qualityProvider.All().ToList();
+            var profiles = _qualityProvider.All();
 
             var defaultQualityQualityProfileId = Convert.ToInt32(_configProvider.DefaultQualityProfile);
             var qualityProfileSelectList = new SelectList(profiles, "QualityProfileId", "Name");
@@ -133,7 +167,8 @@ namespace NzbDrone.Web.Controllers
                                 SdtvMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 1).MaxSize,
                                 DvdMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 2).MaxSize,
                                 HdtvMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 4).MaxSize,
-                                WebdlMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 5).MaxSize,
+                                Webdl720pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 5).MaxSize,
+                                Webdl1080pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 3).MaxSize,
                                 Bluray720pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 6).MaxSize,
                                 Bluray1080pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 7).MaxSize
                             };
@@ -193,32 +228,6 @@ namespace NzbDrone.Web.Controllers
             return View(model);
         }
 
-        public ActionResult Naming()
-        {
-            var model = new EpisodeNamingModel();
-
-            model.SeriesName = _configProvider.SortingIncludeSeriesName;
-            model.EpisodeName = _configProvider.SortingIncludeEpisodeTitle;
-            model.ReplaceSpaces = _configProvider.SortingReplaceSpaces;
-            model.AppendQuality = _configProvider.SortingAppendQuality;
-            model.SeasonFolders = _configProvider.UseSeasonFolder;
-            model.SeasonFolderFormat = _configProvider.SortingSeasonFolderFormat;
-            model.SeparatorStyle = _configProvider.SortingSeparatorStyle;
-            model.NumberStyle = _configProvider.SortingNumberStyle;
-            model.MultiEpisodeStyle = _configProvider.SortingMultiEpisodeStyle;
-            model.SceneName = _configProvider.SortingUseSceneName;
-
-            model.SeparatorStyles = new SelectList(EpisodeSortingHelper.GetSeparatorStyles(), "Id", "Name");
-            model.NumberStyles = new SelectList(EpisodeSortingHelper.GetNumberStyles(), "Id", "Name");
-            model.MultiEpisodeStyles = new SelectList(EpisodeSortingHelper.GetMultiEpisodeStyles(), "Id", "Name");
-            
-            //Metadata
-            model.MetadataXbmcEnabled = _metadataProvider.GetSettings(typeof(Core.Providers.Metadata.Xbmc)).Enable;
-            model.MetadataUseBanners = _configProvider.MetadataUseBanners;
-
-            return View(model);
-        }
-
         public ActionResult System()
         {
             var selectedAuthenticationType = _configFileProvider.AuthenticationType;
@@ -265,7 +274,7 @@ namespace NzbDrone.Web.Controllers
             return GetQualityProfileView(qualityProfile);
         }
 
-        public PartialViewResult GetQualityProfileView(QualityProfile profile)
+        public PartialViewResult  GetQualityProfileView(QualityProfile profile)
         {
             var model = new QualityProfileModel();
             model.QualityProfileId = profile.QualityProfileId;
@@ -274,14 +283,24 @@ namespace NzbDrone.Web.Controllers
             model.Sdtv = profile.Allowed.Contains(QualityTypes.SDTV);
             model.Dvd = profile.Allowed.Contains(QualityTypes.DVD);
             model.Hdtv = profile.Allowed.Contains(QualityTypes.HDTV);
-            model.Webdl = profile.Allowed.Contains(QualityTypes.WEBDL);
+            model.Webdl720p = profile.Allowed.Contains(QualityTypes.WEBDL720p);
+            model.Webdl1080p = profile.Allowed.Contains(QualityTypes.WEBDL1080p);
             model.Bluray720p = profile.Allowed.Contains(QualityTypes.Bluray720p);
             model.Bluray1080p = profile.Allowed.Contains(QualityTypes.Bluray1080p);
-            model.Cutoff = profile.Cutoff;
+            model.Cutoff = (int)profile.Cutoff;
+
+            model.SdtvId = QualityTypes.SDTV.Id;
+            model.DvdId = QualityTypes.DVD.Id;
+            model.HdtvId = QualityTypes.HDTV.Id;
+            model.Webdl720pId = QualityTypes.WEBDL720p.Id;
+            model.Webdl1080pId = QualityTypes.WEBDL1080p.Id;
+            model.Bluray720pId = QualityTypes.Bluray720p.Id;
+            model.Bluray1080pId = QualityTypes.Bluray1080p.Id;
 
             return PartialView("QualityProfileItem", model);
         }
 
+        [HttpPost]
         [JsonErrorFilter]
         public JsonResult DeleteQualityProfile(int profileId)
         {
@@ -290,7 +309,7 @@ namespace NzbDrone.Web.Controllers
 
             _qualityProvider.Delete(profileId);
 
-            return new JsonResult();
+            return Json("ok");
         }
 
         public PartialViewResult AddNewznabProvider()
@@ -401,6 +420,13 @@ namespace NzbDrone.Web.Controllers
                 _configProvider.FileSharingTalkUid = data.FileSharingTalkUid;
                 _configProvider.FileSharingTalkSecret = data.FileSharingTalkSecret;
 
+                //Save the interval to config and immediately apply it the the job (to avoid a restart)
+                _configProvider.RssSyncInterval = data.RssSyncInterval;
+
+                var rssSyncJob = _jobProvider.GetDefinition(typeof(RssSyncJob));
+                rssSyncJob.Interval = data.RssSyncInterval;
+                _jobProvider.SaveDefinition(rssSyncJob);
+
                 try
                 {
                     if (data.NewznabDefinitions != null)
@@ -458,7 +484,7 @@ namespace NzbDrone.Web.Controllers
                     var profile = new QualityProfile();
                     profile.QualityProfileId = profileModel.QualityProfileId;
                     profile.Name = profileModel.Name;
-                    profile.Cutoff = profileModel.Cutoff;
+                    profile.Cutoff = (QualityTypes)profileModel.Cutoff;
 
                     profile.Allowed = new List<QualityTypes>();
 
@@ -471,8 +497,11 @@ namespace NzbDrone.Web.Controllers
                     if (profileModel.Hdtv)
                         profile.Allowed.Add(QualityTypes.HDTV);
 
-                    if (profileModel.Webdl)
-                        profile.Allowed.Add(QualityTypes.WEBDL);
+                    if (profileModel.Webdl720p)
+                        profile.Allowed.Add(QualityTypes.WEBDL720p);
+
+                    if (profileModel.Webdl1080p)
+                        profile.Allowed.Add(QualityTypes.WEBDL1080p);
 
                     if (profileModel.Bluray720p)
                         profile.Allowed.Add(QualityTypes.Bluray720p);
@@ -492,7 +521,8 @@ namespace NzbDrone.Web.Controllers
                 qualityTypesFromDb.Single(q => q.QualityTypeId == 1).MaxSize = data.SdtvMaxSize;
                 qualityTypesFromDb.Single(q => q.QualityTypeId == 2).MaxSize = data.DvdMaxSize;
                 qualityTypesFromDb.Single(q => q.QualityTypeId == 4).MaxSize = data.HdtvMaxSize;
-                qualityTypesFromDb.Single(q => q.QualityTypeId == 5).MaxSize = data.WebdlMaxSize;
+                qualityTypesFromDb.Single(q => q.QualityTypeId == 5).MaxSize = data.Webdl720pMaxSize;
+                qualityTypesFromDb.Single(q => q.QualityTypeId == 3).MaxSize = data.Webdl1080pMaxSize;
                 qualityTypesFromDb.Single(q => q.QualityTypeId == 6).MaxSize = data.Bluray720pMaxSize;
                 qualityTypesFromDb.Single(q => q.QualityTypeId == 7).MaxSize = data.Bluray1080pMaxSize;
 

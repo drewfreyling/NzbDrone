@@ -6,6 +6,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using LowercaseRoutesMVC;
 using NLog.Config;
 using Ninject;
 using Ninject.Web.Mvc;
@@ -25,12 +26,16 @@ namespace NzbDrone.Web
             routes.IgnoreRoute("{*robotstxt}", new { robotstxt = @"(.*/)?robots.txt(/.*)?" });
             routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
 
+            routes.MapRouteLowercase(
+                name: "WithSeasonNumber",
+                url: "{controller}/{action}/{seriesId}/{seasonNumber}"
+            );
 
-            routes.MapRoute(
-                "Default", // Route name
-                "{controller}/{action}/{id}", // URL with parameters
-                new { controller = "Series", action = "Index", id = UrlParameter.Optional } // Parameter defaults
-                );
+            routes.MapRouteLowercase(
+                name: "SeriesId",
+                url: "{controller}/{action}/{seriesId}",
+                defaults: new { controller = "Series", action = "Index", seriesId = UrlParameter.Optional }
+            );
         }
 
         protected override void OnApplicationStarted()

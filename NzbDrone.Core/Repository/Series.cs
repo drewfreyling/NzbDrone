@@ -48,6 +48,10 @@ namespace NzbDrone.Core.Repository
 
         public string Network { get; set; }
 
+        public DateTime? CustomStartDate { get; set; }
+
+        public bool UseSceneNumbering { get; set; }
+
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Series"/> is hidden.
         /// </summary>

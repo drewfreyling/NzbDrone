@@ -11,6 +11,8 @@ namespace NzbDrone.Common
         public const string NZBDRONE_PID = "NZBDRONE_PID";
         public const string ROOT_MARKER = "NzbDrone.Web";
 
+        public static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
+
         private static readonly string processName = Process.GetCurrentProcess().ProcessName.ToLower();
 
         private static readonly EnvironmentProvider instance = new EnvironmentProvider();
@@ -64,7 +66,6 @@ namespace NzbDrone.Common
                 if (!string.IsNullOrWhiteSpace(applicationPath))
                     return applicationPath;
 
-
                 applicationPath = CrawlToRoot(Environment.CurrentDirectory);
                 if (!string.IsNullOrWhiteSpace(applicationPath))
                     return applicationPath;
@@ -83,6 +84,9 @@ namespace NzbDrone.Common
 
         public string CrawlToRoot(string dir)
         {
+            if (String.IsNullOrWhiteSpace(dir))
+                return null;
+
             var directoryInfo = new DirectoryInfo(dir);
 
             while (!IsRoot(directoryInfo))

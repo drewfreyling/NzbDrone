@@ -1,13 +1,12 @@
 ﻿//URLs
-var addSeriesUrl = '../AddSeries/AddExistingSeries';
-var addNewSeriesUrl = '../AddSeries/AddNewSeries';
-var quickAddNewSeriesUrl = '../AddSeries/QuickAddNewSeries';
-var existingSeriesUrl = '../AddSeries/ExistingSeries';
-var addNewUrl = '../AddSeries/AddNew';
+var addSeriesUrl = '/addseries/addexistingseries';
+var addNewSeriesUrl = '/addseries/addnewseries';
+var existingSeriesUrl = '/addseries/existingseries';
+var addNewUrl = '/addseries/addnew';
 
-var deleteRootDirUrl = '../AddSeries/DeleteRootDir';
-var saveRootDirUrl = '../AddSeries/SaveRootDir';
-var rootListUrl = '../AddSeries/RootList';
+var deleteRootDirUrl = '/addseries/deleterootdir';
+var saveRootDirUrl = '/addseries/saverootdir';
+var rootListUrl = '/addseries/rootlist';
 
 
 //ExistingSeries
@@ -19,11 +18,14 @@ $(".masterQualitySelector").live('change', function () {
     });
 });
 
-$(".addExistingButton").live('click', function() {
+$(".addExistingButton").live('click', function () {
+    var button = $(this);
+    $(button).attr('disabled', 'disabled');
     var root = $(this).parents(".existingSeries");
     var title = $(this).siblings(".seriesLookup").val();
     var seriesId = $(this).siblings(".seriesId").val();
     var qualityId = $(this).siblings(".qualitySelector").val();
+    var date = $(this).siblings('.start-date').val();
 
     var path = root.find(".seriesPathValue Label").text();
 
@@ -31,7 +33,7 @@ $(".addExistingButton").live('click', function() {
         $.gritter.add({
             title: 'Failed',
             text: 'Invalid Series Information for \'' + path + '\'',
-            image: '../../content/images/error.png',
+            icon: 'icon-minus-sign',
             class_name: 'gritter-fail'
         });
 
@@ -41,9 +43,9 @@ $(".addExistingButton").live('click', function() {
     $.ajax({
         type: "POST",
         url: addSeriesUrl,
-        data: jQuery.param({ path: path, seriesName: title, seriesId: seriesId, qualityProfileId: qualityId }),
-        error: function(req, status, error) {
-            alert("Sorry! We could not add " + path + " at this time. " + error);
+        data: jQuery.param({ path: path, seriesName: title, seriesId: seriesId, qualityProfileId: qualityId, startDate: date }),
+        error: function (req, status, error) {
+            $(button).removeAttr('disabled');
         },
         success: function() {
             root.hide('highlight', 'fast');
@@ -64,10 +66,18 @@ function reloadExistingSeries() {
     });
 }
 
+$(".start-date-master").live('change', function () {
+
+    var date = $(this).val();
+    $("#existingSeries").find(".start-date").each(function () {
+        $(this).val(date);
+    });
+});
+
 //RootDir
 //Delete RootDir
-$('#rootDirs .actionButton img').live('click', function (image) {
-    var path = $(image.target).attr('id');
+$(document).on('click', '.delete-root', function () {
+    var path = $(this).attr('data-path');
 
     $.ajax({
         type: "POST",
@@ -112,20 +122,25 @@ function refreshRoot() {
 
 //AddNew
 $('#saveNewSeries').live('click', function () {
+    $('#saveNewSeries').attr('disabled', 'disabled');
+
     var seriesTitle = $("#newSeriesLookup").val();
     var seriesId = $("#newSeriesId").val();
     var qualityId = $("#qualityList").val();
     var path = $('#newSeriesPath').val();
+    var date = $('#newStartDate').val();
 
     $.ajax({
         type: "POST",
         url: addNewSeriesUrl,
-        data: jQuery.param({ path: path, seriesName: seriesTitle, seriesId: seriesId, qualityProfileId: qualityId }),
+        data: jQuery.param({ path: path, seriesName: seriesTitle, seriesId: seriesId, qualityProfileId: qualityId, startDate: date }),
         error: function (req, status, error) {
-            alert("Sorry! We could not add " + path + " at this time. " + error);
+            $('#saveNewSeries').removeAttr('disabled');
         },
         success: function () {
-            $("#newSeriesLookup").val("");
+            $('#saveNewSeries').removeAttr('disabled');
+            $("#newSeriesLookup").val('');
+            $('#newStartDate').val('');
         }
     });
 });
@@ -138,27 +153,6 @@ function reloadAddNew() {
         }
     });
 }
-
-
-//QuickAddNew
-$('#quickAddNew').live('click', function () {
-    var seriesTitle = $("#newSeriesLookup").val();
-    var seriesId = $("#newSeriesId").val();
-    var qualityId = $("#qualityList").val();
-
-    $.ajax({
-        type: "POST",
-        url: quickAddNewSeriesUrl,
-        data: jQuery.param({ seriesName: seriesTitle, seriesId: seriesId, qualityProfileId: qualityId }),
-        error: function (req, status, error) {
-            alert("Sorry! We could not add " + path + " at this time. " + error);
-        },
-        success: function () {
-            $("#newSeriesLookup").val("");
-            $('#newSeriesPath').val("");
-        }
-    });
-});
 
 
 //Watermark

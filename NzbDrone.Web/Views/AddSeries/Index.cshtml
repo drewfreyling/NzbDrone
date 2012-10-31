@@ -19,6 +19,11 @@
         left: 415px;
         position: relative;
     }
+
+    .start-date-master {
+        left: 430px;
+        position: relative;
+    }
     
     .seriesPathValue
     {
@@ -45,11 +50,15 @@
         cursor: pointer;
         text-decoration: underline;
     }
+
+    input[type=date].start-date {
+        margin-left: 10px;
+    }
 </style>
 }
 
 @{Html.RenderAction("RootDir");}
-<div class="jquery-accordion" id="addSeriesAccordion">
+<div class="jquery-accordion jquery-accordion-collapse-all" id="addSeriesAccordion">
     <h3>
         <a href="#">Add New Series</a></h3>
     <div id="addNewSeries">
@@ -58,7 +67,14 @@
     <h3>
         <a href="#">Add Series Already on Disk</a></h3>
     <div id="existingSeries">
-        @{ Html.RenderAction("ExistingSeries", "AddSeries"); }
+        <img src="../../Content/Images/ajax-loader.gif" />
+
+        @Ajax.RenderAction(
+                               "ExistingSeries",
+                               "AddSeries",
+                               null,
+                               new AjaxOptions { UpdateTargetId = "existingSeries", InsertionMode = InsertionMode.Replace }
+                           )
     </div>
 </div>
 
@@ -67,10 +83,6 @@
     @Html.IncludeScript("NzbDrone/addSeries.js")
 
     <script type="text/javascript">
-        $(document).ready(function () {
-            $('#addSeriesAccordion').accordion("activate", false);
-        });
-
         $(document).on('click', '.tvDbLink', function (event) {
             var url = $(this).attr('rel');
             window.open(url, 'thetvdb');

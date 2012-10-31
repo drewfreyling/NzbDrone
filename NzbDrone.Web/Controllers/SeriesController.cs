@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
@@ -12,6 +13,7 @@ using NzbDrone.Core.Model;
 using NzbDrone.Core.Providers;
 using NzbDrone.Core.Repository;
 using NzbDrone.Core.Repository.Quality;
+using NzbDrone.Web.Filters;
 using NzbDrone.Web.Models;
 
 namespace NzbDrone.Web.Controllers
@@ -38,13 +40,18 @@ namespace NzbDrone.Web.Controllers
 
         public ActionResult Index()
         {
-            var series = GetSeriesModels(_seriesProvider.GetAllSeriesWithEpisodeCount());
-            var serialized = new JavaScriptSerializer().Serialize(series);
-
-            return View((object)serialized);
+            return View();
         }
 
-        public ActionResult SingleSeriesEditor(int seriesId)
+        [HttpGet]
+        public ActionResult Series()
+        {
+            var series = GetSeriesModels(_seriesProvider.GetAllSeriesWithEpisodeCount());
+
+            return Json(new { aaData = series }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Edit(int seriesId)
         {
             var profiles = _qualityProvider.All();
             ViewData["SelectList"] = new SelectList(profiles, "QualityProfileId", "Name");
@@ -63,7 +70,7 @@ namespace NzbDrone.Web.Controllers
         }
 
         [HttpPost]
-        public EmptyResult SaveSingleSeriesEditor(SeriesModel seriesModel)
+        public EmptyResult Edit(SeriesModel seriesModel)
         {
             var series = _seriesProvider.GetSeries(seriesModel.SeriesId);
             series.Monitored = seriesModel.Monitored;
@@ -72,23 +79,28 @@ namespace NzbDrone.Web.Controllers
             series.Path = seriesModel.Path;
             series.BacklogSetting = (BacklogSettingType)seriesModel.BacklogSetting;
 
+            if (!String.IsNullOrWhiteSpace(seriesModel.CustomStartDate))
+                series.CustomStartDate = DateTime.Parse(seriesModel.CustomStartDate, null, DateTimeStyles.RoundtripKind);
+
+            else
+                series.CustomStartDate = null;
+
             _seriesProvider.UpdateSeries(series);
 
             return new EmptyResult();
         }
 
         [HttpPost]
-        public EmptyResult DeleteSeries(int seriesId, bool deleteFiles)
+        public EmptyResult Delete(int seriesId, bool deleteFiles)
         {
-            _jobProvider.QueueJob(typeof(DeleteSeriesJob), seriesId, Convert.ToInt32(deleteFiles));
+            _jobProvider.QueueJob(typeof(DeleteSeriesJob), new { SeriesId = seriesId, DeleteFiles = deleteFiles });
 
             return new EmptyResult();
         }
 
+        [JsonErrorFilter]
         public JsonResult LocalSearch(string term)
         {
-            //Get Results from the local DB and return
-
             var results = _seriesProvider.SearchForSeries(term).Select(s => new SeriesSearchResultModel
                                                                    {
                                                                        Id = s.SeriesId,
@@ -127,8 +139,7 @@ namespace NzbDrone.Web.Controllers
                                                                     }).ToList();
             model.Seasons = seasons;
 
-            var qualities = (from QualityTypes q in Enum.GetValues(typeof(QualityTypes))
-                             select new { Id = (int)q, Name = q.ToString() }).ToList();
+            var qualities = QualityTypes.All().ToList();
 
             model.QualitySelectList = new SelectList(qualities.Where(q => q.Id > 0), "Id", "Name");
   
@@ -166,19 +177,30 @@ namespace NzbDrone.Web.Controllers
             masterBacklogList.Insert(0, new KeyValuePair<int, string>(-10, "Select..."));
             ViewData["MasterBacklogSettingSelectList"] = new SelectList(masterBacklogList, "Key", "Value");
 
-            var series = _seriesProvider.GetAllSeries().OrderBy(o => SortHelper.SkipArticles(o.Title));
+            var series = GetSeriesModels(_seriesProvider.GetAllSeries()).OrderBy(o => SortHelper.SkipArticles(o.Title));
 
             return View(series);
         }
 
         [HttpPost]
-        public JsonResult SaveEditor(List<Series> series)
+        public JsonResult Editor(List<SeriesModel> series)
         {
             //Save edits
             if (series == null || series.Count == 0)
                 return JsonNotificationResult.Oops("Invalid post data");
 
-            _seriesProvider.UpdateFromSeriesEditor(series);
+            _seriesProvider.UpdateFromSeriesEditor(series.Select(s => new Series
+                                            {
+                                                    SeriesId = s.SeriesId,
+                                                    QualityProfileId = s.QualityProfileId,
+                                                    Monitored = s.Monitored,
+                                                    SeasonFolder =  s.SeasonFolder,
+                                                    BacklogSetting = (BacklogSettingType)s.BacklogSetting,
+                                                    Path = s.Path,
+                                                    CustomStartDate = String.IsNullOrWhiteSpace(s.CustomStartDate) ? (DateTime?)null 
+                                                                                : DateTime.Parse(s.CustomStartDate, null, DateTimeStyles.RoundtripKind)
+                                            }
+                    ).ToList());
             return JsonNotificationResult.Info("Series Mass Edit Saved");
         }
 
@@ -204,7 +226,8 @@ namespace NzbDrone.Web.Controllers
                                                         EpisodeFileCount = s.EpisodeFileCount,
                                                         NextAiring = s.NextAiring == null ? String.Empty : s.NextAiring.Value.ToBestDateString(),
                                                         NextAiringSorter = s.NextAiring == null ? "12/31/9999" : s.NextAiring.Value.ToString("MM/dd/yyyy"),
-                                                        AirTime = s.AirTimes
+                                                        AirTime = s.AirTimes,
+                                                        CustomStartDate = s.CustomStartDate.HasValue ? s.CustomStartDate.Value.ToString("yyyy-MM-dd") : String.Empty
                                                     }).ToList();
 
             return series;

@@ -62,7 +62,7 @@ namespace NzbDrone.Common.Test
             var targetPath = Path.Combine(BinFolderCopy.FullName, "file.move");
 
             diskProvider.MoveFile(BinFolderCopy.GetFiles("*.dll", SearchOption.AllDirectories).First().FullName, targetPath);
-            diskProvider.MoveFile(BinFolderCopy.GetFiles("*.dll", SearchOption.AllDirectories).First().FullName, targetPath);
+            diskProvider.MoveFile(BinFolderCopy.GetFiles("*.pdb", SearchOption.AllDirectories).First().FullName, targetPath);
 
             File.Exists(targetPath).Should().BeTrue();
         }
@@ -173,6 +173,18 @@ namespace NzbDrone.Common.Test
         {
            Console.WriteLine(Mocker.Resolve<DiskProvider>().GetLastDirectoryWrite(@"C:\DRIVERS"));
            Console.WriteLine(new DirectoryInfo(@"C:\DRIVERS").LastWriteTimeUtc);
+        }
+
+        [Test]
+        public void IsChildOfPath_should_return_true_when_it_is_a_child()
+        {
+            Mocker.Resolve<DiskProvider>().IsChildOfPath(@"C:\Test\TV", @"C:\Test").Should().BeTrue();
+        }
+
+        [Test]
+        public void IsChildOfPath_should_return_false_when_it_is_not_a_child()
+        {
+            Mocker.Resolve<DiskProvider>().IsChildOfPath(@"C:\NOT_Test\TV", @"C:\Test").Should().BeFalse();
         }
 
         private void VerifyCopy()
