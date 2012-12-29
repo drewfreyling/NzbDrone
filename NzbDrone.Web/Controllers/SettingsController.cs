@@ -95,26 +95,23 @@ namespace NzbDrone.Web.Controllers
                             {
                                 Retention = _configProvider.Retention,
 
-                                NzbMatrixUsername = _configProvider.NzbMatrixUsername,
-                                NzbMatrixApiKey = _configProvider.NzbMatrixApiKey,
-
                                 NzbsrusUId = _configProvider.NzbsrusUId,
                                 NzbsrusHash = _configProvider.NzbsrusHash,
-
-                                NewzbinUsername = _configProvider.NewzbinUsername,
-                                NewzbinPassword = _configProvider.NewzbinPassword,
 
                                 FileSharingTalkUid = _configProvider.FileSharingTalkUid,
                                 FileSharingTalkSecret = _configProvider.FileSharingTalkSecret,
 
-                                NzbMatrixEnabled = _indexerProvider.GetSettings(typeof(NzbMatrix)).Enable,
+                                OmgwtfnzbsUsername = _configProvider.OmgwtfnzbsUsername,
+                                OmgwtfnzbsApiKey = _configProvider.OmgwtfnzbsApiKey,
+
                                 NzbsRUsEnabled = _indexerProvider.GetSettings(typeof(NzbsRUs)).Enable,
-                                NewzbinEnabled = _indexerProvider.GetSettings(typeof(Newzbin)).Enable,
                                 NewznabEnabled = _indexerProvider.GetSettings(typeof(Newznab)).Enable,
                                 WomblesEnabled = _indexerProvider.GetSettings(typeof(Wombles)).Enable,
                                 FileSharingTalkEnabled = _indexerProvider.GetSettings(typeof(FileSharingTalk)).Enable,
                                 NzbIndexEnabled = _indexerProvider.GetSettings(typeof(NzbIndex)).Enable,
                                 NzbClubEnabled = _indexerProvider.GetSettings(typeof(NzbClub)).Enable,
+                                OmgwtfnzbsEnabled = _indexerProvider.GetSettings(typeof(Omgwtfnzbs)).Enable,
+                                NzbxEnabled = _indexerProvider.GetSettings(typeof(Nzbx)).Enable,
 
                                 RssSyncInterval = _configProvider.RssSyncInterval,
 
@@ -140,8 +137,9 @@ namespace NzbDrone.Web.Controllers
                                 SabUsername = _configProvider.SabUsername,
                                 SabPassword = _configProvider.SabPassword,
                                 SabTvCategory = tvCategory,
-                                SabTvPriority = _configProvider.SabTvPriority,
-                                DownloadClientDropDirectory = _configProvider.SabDropDirectory,
+                                SabBacklogTvPriority = _configProvider.SabBacklogTvPriority,
+                                SabRecentTvPriority = _configProvider.SabRecentTvPriority,
+                                DownloadClientDropDirectory = _configProvider.DownloadClientTvDirectory,
                                 SabTvCategorySelectList = tvCategorySelectList,
                                 DownloadClient = (int)_configProvider.DownloadClient,
                                 BlackholeDirectory = _configProvider.BlackholeDirectory,
@@ -173,7 +171,7 @@ namespace NzbDrone.Web.Controllers
                                 Bluray1080pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 7).MaxSize
                             };
 
-            ViewData["Profiles"] = profiles;
+            ViewData["Profiles"] = profiles.Select(s => s.QualityProfileId).ToList();
 
             return View(model);
         }
@@ -193,7 +191,7 @@ namespace NzbDrone.Web.Controllers
                                 XbmcUpdateWhenPlaying = _configProvider.XbmcUpdateWhenPlaying,
                                 SmtpEnabled = _externalNotificationProvider.GetSettings(typeof(Smtp)).Enable,
                                 SmtpNotifyOnGrab = _configProvider.SmtpNotifyOnGrab,
-                                SmtpNotifyOnDownload = _configProvider.SmtpNotifyOnGrab,
+                                SmtpNotifyOnDownload = _configProvider.SmtpNotifyOnDownload,
                                 SmtpServer = _configProvider.SmtpServer,
                                 SmtpPort = _configProvider.SmtpPort,
                                 SmtpUseSsl = _configProvider.SmtpUseSsl,
@@ -256,6 +254,7 @@ namespace NzbDrone.Web.Controllers
             model.EnableBacklogSearching = _configProvider.EnableBacklogSearching;
             model.AutoIgnorePreviouslyDownloadedEpisodes = _configProvider.AutoIgnorePreviouslyDownloadedEpisodes;
             model.AllowedReleaseGroups = _configProvider.AllowedReleaseGroups;
+            model.IgnoreArticlesWhenSortingSeries = _configProvider.IgnoreArticlesWhenSortingSeries;
 
             return View(model);
         }
@@ -269,13 +268,15 @@ namespace NzbDrone.Web.Controllers
                                          Cutoff = QualityTypes.Unknown
                                      };
 
-            qualityProfile.QualityProfileId = _qualityProvider.Add(qualityProfile);
+            var qualityProfileId = _qualityProvider.Add(qualityProfile);
 
-            return GetQualityProfileView(qualityProfile);
+            return GetQualityProfileView(qualityProfileId);
         }
 
-        public PartialViewResult  GetQualityProfileView(QualityProfile profile)
+        public PartialViewResult GetQualityProfileView(int profileId)
         {
+            var profile = _qualityProvider.Get(profileId);
+
             var model = new QualityProfileModel();
             model.QualityProfileId = profile.QualityProfileId;
             model.Name = profile.Name;
@@ -376,17 +377,9 @@ namespace NzbDrone.Web.Controllers
             {
                 _configProvider.Retention = data.Retention;
 
-                var nzbMatrixSettings = _indexerProvider.GetSettings(typeof(NzbMatrix));
-                nzbMatrixSettings.Enable = data.NzbMatrixEnabled;
-                _indexerProvider.SaveSettings(nzbMatrixSettings);
-
                 var nzbsRUsSettings = _indexerProvider.GetSettings(typeof(NzbsRUs));
                 nzbsRUsSettings.Enable = data.NzbsRUsEnabled;
                 _indexerProvider.SaveSettings(nzbsRUsSettings);
-
-                var newzbinSettings = _indexerProvider.GetSettings(typeof(Newzbin));
-                newzbinSettings.Enable = data.NewzbinEnabled;
-                _indexerProvider.SaveSettings(newzbinSettings);
 
                 var newznabSettings = _indexerProvider.GetSettings(typeof(Newznab));
                 newznabSettings.Enable = data.NewznabEnabled;
@@ -408,17 +401,22 @@ namespace NzbDrone.Web.Controllers
                 nzbClubSettings.Enable = data.NzbClubEnabled;
                 _indexerProvider.SaveSettings(nzbClubSettings);
 
-                _configProvider.NzbMatrixUsername = data.NzbMatrixUsername;
-                _configProvider.NzbMatrixApiKey = data.NzbMatrixApiKey;
+                var omgwtfnzbsSettings = _indexerProvider.GetSettings(typeof(Omgwtfnzbs));
+                omgwtfnzbsSettings.Enable = data.OmgwtfnzbsEnabled;
+                _indexerProvider.SaveSettings(omgwtfnzbsSettings);
+
+                var nzbxSettings = _indexerProvider.GetSettings(typeof(Nzbx));
+                nzbxSettings.Enable = data.NzbxEnabled;
+                _indexerProvider.SaveSettings(nzbxSettings);
 
                 _configProvider.NzbsrusUId = data.NzbsrusUId;
                 _configProvider.NzbsrusHash = data.NzbsrusHash;
 
-                _configProvider.NewzbinUsername = data.NewzbinUsername;
-                _configProvider.NewzbinPassword = data.NewzbinPassword;
-
                 _configProvider.FileSharingTalkUid = data.FileSharingTalkUid;
                 _configProvider.FileSharingTalkSecret = data.FileSharingTalkSecret;
+
+                _configProvider.OmgwtfnzbsUsername = data.OmgwtfnzbsUsername;
+                _configProvider.OmgwtfnzbsApiKey = data.OmgwtfnzbsApiKey;
 
                 //Save the interval to config and immediately apply it the the job (to avoid a restart)
                 _configProvider.RssSyncInterval = data.RssSyncInterval;
@@ -454,8 +452,9 @@ namespace NzbDrone.Web.Controllers
                 _configProvider.SabPassword = data.SabPassword;
                 _configProvider.SabTvCategory = data.SabTvCategory;
                 _configProvider.SabUsername = data.SabUsername;
-                _configProvider.SabTvPriority = data.SabTvPriority;
-                _configProvider.SabDropDirectory = data.DownloadClientDropDirectory;
+                _configProvider.SabBacklogTvPriority = data.SabBacklogTvPriority;
+                _configProvider.SabRecentTvPriority = data.SabRecentTvPriority;
+                _configProvider.DownloadClientTvDirectory = data.DownloadClientDropDirectory;
                 _configProvider.BlackholeDirectory = data.BlackholeDirectory;
                 _configProvider.DownloadClient = (DownloadClientType)data.DownloadClient;
                 _configProvider.PneumaticDirectory = data.PneumaticDirectory;
@@ -669,6 +668,7 @@ namespace NzbDrone.Web.Controllers
                 _configProvider.EnableBacklogSearching = data.EnableBacklogSearching;
                 _configProvider.AutoIgnorePreviouslyDownloadedEpisodes = data.AutoIgnorePreviouslyDownloadedEpisodes;
                 _configProvider.AllowedReleaseGroups = data.AllowedReleaseGroups;
+                _configProvider.IgnoreArticlesWhenSortingSeries = data.IgnoreArticlesWhenSortingSeries;
 
                 return GetSuccessResult();
             }

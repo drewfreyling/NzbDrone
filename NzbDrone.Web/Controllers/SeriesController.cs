@@ -11,6 +11,7 @@ using NzbDrone.Core.Helpers;
 using NzbDrone.Core.Jobs;
 using NzbDrone.Core.Model;
 using NzbDrone.Core.Providers;
+using NzbDrone.Core.Providers.Core;
 using NzbDrone.Core.Repository;
 using NzbDrone.Core.Repository.Quality;
 using NzbDrone.Web.Filters;
@@ -25,17 +26,19 @@ namespace NzbDrone.Web.Controllers
         private readonly SeriesProvider _seriesProvider;
         private readonly JobProvider _jobProvider;
         private readonly SeasonProvider _seasonProvider;
+        private readonly ConfigProvider _configProvider;
         //
         // GET: /Series/
 
-        public SeriesController(SeriesProvider seriesProvider,
-                                QualityProvider qualityProvider, JobProvider jobProvider,
-                                SeasonProvider seasonProvider)
+        public SeriesController(SeriesProvider seriesProvider, QualityProvider qualityProvider, 
+                                    JobProvider jobProvider, SeasonProvider seasonProvider,
+                                    ConfigProvider configProvider)
         {
             _seriesProvider = seriesProvider;
             _qualityProvider = qualityProvider;
             _jobProvider = jobProvider;
             _seasonProvider = seasonProvider;
+            _configProvider = configProvider;
         }
 
         public ActionResult Index()
@@ -177,7 +180,7 @@ namespace NzbDrone.Web.Controllers
             masterBacklogList.Insert(0, new KeyValuePair<int, string>(-10, "Select..."));
             ViewData["MasterBacklogSettingSelectList"] = new SelectList(masterBacklogList, "Key", "Value");
 
-            var series = GetSeriesModels(_seriesProvider.GetAllSeries()).OrderBy(o => SortHelper.SkipArticles(o.Title));
+            var series = GetSeriesModels(_seriesProvider.GetAllSeries());
 
             return View(series);
         }
@@ -206,11 +209,13 @@ namespace NzbDrone.Web.Controllers
 
         private List<SeriesModel> GetSeriesModels(IList<Series> seriesInDb)
         {
+            var ignoreArticles = _configProvider.IgnoreArticlesWhenSortingSeries;
+
             var series = seriesInDb.Select(s => new SeriesModel
                                                     {
                                                         SeriesId = s.SeriesId,
                                                         Title = s.Title,
-                                                        TitleSorter = SortHelper.SkipArticles(s.Title),
+                                                        TitleSorter = ignoreArticles? s.Title.IgnoreArticles() : s.Title,
                                                         AirsDayOfWeek = s.AirsDayOfWeek.ToString(),
                                                         Monitored = s.Monitored,
                                                         Overview = s.Overview,
@@ -225,7 +230,7 @@ namespace NzbDrone.Web.Controllers
                                                         EpisodeCount = s.EpisodeCount,
                                                         EpisodeFileCount = s.EpisodeFileCount,
                                                         NextAiring = s.NextAiring == null ? String.Empty : s.NextAiring.Value.ToBestDateString(),
-                                                        NextAiringSorter = s.NextAiring == null ? "12/31/9999" : s.NextAiring.Value.ToString("MM/dd/yyyy"),
+                                                        NextAiringSorter = s.NextAiring == null ? new DateTime(9999, 12, 31).ToString("o", CultureInfo.InvariantCulture) : s.NextAiring.Value.ToString("o", CultureInfo.InvariantCulture),
                                                         AirTime = s.AirTimes,
                                                         CustomStartDate = s.CustomStartDate.HasValue ? s.CustomStartDate.Value.ToString("yyyy-MM-dd") : String.Empty
                                                     }).ToList();

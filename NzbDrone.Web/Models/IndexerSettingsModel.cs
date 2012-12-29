@@ -10,20 +10,6 @@ namespace NzbDrone.Web.Models
     public class IndexerSettingsModel
     {
         [DataType(DataType.Text)]
-        [DisplayName("Username")]
-        [Description("Username for NZB Matrix")]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
-        [RequiredIf("NzbMatrixEnabled", true, ErrorMessage = "Username Required when NZBMatrix is enabled")]
-        public String NzbMatrixUsername { get; set; }
-
-        [DataType(DataType.Text)]
-        [DisplayName("API Key")]
-        [Description("API Key for NZB Matrix")]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
-        [RequiredIf("NzbMatrixEnabled", true, ErrorMessage = "API Key Required when NZBMatrix is enabled")]
-        public String NzbMatrixApiKey { get; set; }
-
-        [DataType(DataType.Text)]
         [DisplayName("User ID")]
         [Description("User ID for NZBsRus")]
         [DisplayFormat(ConvertEmptyStringToNull = false)]
@@ -36,20 +22,6 @@ namespace NzbDrone.Web.Models
         [DisplayFormat(ConvertEmptyStringToNull = false)]
         [RequiredIf("NzbsRUsEnabled", true, ErrorMessage = "API Key Required when NzbsRus is enabled")]
         public String NzbsrusHash { get; set; }
-
-        [DataType(DataType.Text)]
-        [DisplayName("Username")]
-        [Description("Username for Newzbin")]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
-        [RequiredIf("NewzbinEnabled", true, ErrorMessage = "Username Required when Newzbin is enabled")]
-        public String NewzbinUsername { get; set; }
-
-        [DataType(DataType.Text)]
-        [DisplayName("Password")]
-        [Description("Password for Newzbin")]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
-        [RequiredIf("NewzbinEnabled", true, ErrorMessage = "Password Required when Newzbin is enabled")]
-        public String NewzbinPassword { get; set; }
 
         [DataType(DataType.Text)]
         [DisplayName("UID")]
@@ -65,17 +37,23 @@ namespace NzbDrone.Web.Models
         [RequiredIf("FileSharingTalkEnabled", true, ErrorMessage = "Password Secret Required when File Sharing Talk is enabled")]
         public String FileSharingTalkSecret { get; set; }
 
-        [DisplayName("NZB Matrix")]
-        [Description("Enable downloading episodes from NZB Matrix")]
-        public bool NzbMatrixEnabled { get; set; }
+        [DataType(DataType.Text)]
+        [DisplayName("Username")]
+        [Description("Username for omgwtfnzbs")]
+        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        [RequiredIf("OmgwtfnzbsEnabled", true, ErrorMessage = "Username is required when omgwtfnzbs is enabled")]
+        public String OmgwtfnzbsUsername { get; set; }
+
+        [DataType(DataType.Text)]
+        [DisplayName("API Key")]
+        [Description("API Key for omgwtfnzbs")]
+        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        [RequiredIf("OmgwtfnzbsEnabled", true, ErrorMessage = "API Key is required when omgwtfnzbs is enabled")]
+        public String OmgwtfnzbsApiKey { get; set; }
 
         [DisplayName("NZBsRUs")]
         [Description("Enable downloading episodes from NZBsRus")]
         public bool NzbsRUsEnabled { get; set; }
-
-        [DisplayName("Newzbin")]
-        [Description("Enable downloading episodes from Newzbin")]
-        public bool NewzbinEnabled { get; set; }
 
         [DisplayName("Newznab")]
         [Description("Enable downloading episodes from Newznab Providers")]
@@ -96,6 +74,14 @@ namespace NzbDrone.Web.Models
         [DisplayName("NzbClub")]
         [Description("Enable downloading episodes from NzbClub")]
         public bool NzbClubEnabled { get; set; }
+
+        [DisplayName("omgwtfnzbs")]
+        [Description("Enable downloading episodes from omgwtfnzbs")]
+        public bool OmgwtfnzbsEnabled { get; set; }
+
+        [DisplayName("nzbx")]
+        [Description("Enable downloading episodes from nzbx")]
+        public bool NzbxEnabled { get; set; }
 
         [Required(ErrorMessage = "Please enter a valid number of days")]
         [DataType(DataType.Text)]

@@ -87,14 +87,14 @@ namespace NzbDrone.Core
         private void InitIndexers()
         {
             logger.Debug("Initializing Indexers...");
-            Kernel.Bind<IndexerBase>().To<NzbMatrix>();
             Kernel.Bind<IndexerBase>().To<NzbsRUs>();
-            Kernel.Bind<IndexerBase>().To<Newzbin>();
             Kernel.Bind<IndexerBase>().To<Newznab>();
             Kernel.Bind<IndexerBase>().To<Wombles>();
             Kernel.Bind<IndexerBase>().To<FileSharingTalk>();
             Kernel.Bind<IndexerBase>().To<NzbIndex>();
             Kernel.Bind<IndexerBase>().To<NzbClub>();
+            Kernel.Bind<IndexerBase>().To<Omgwtfnzbs>();
+            Kernel.Bind<IndexerBase>().To<Nzbx>();
 
             var indexers = Kernel.GetAll<IndexerBase>();
             Kernel.Get<IndexerProvider>().InitializeIndexers(indexers.ToList());

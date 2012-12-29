@@ -63,9 +63,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\DeskMetrics\DeskMetrics.NET.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\EntityFramework.4.3.0\lib\net40\EntityFramework.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.4.3.1\lib\net40\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="FizzWare.NBuilder, Version=3.0.1.0, Culture=neutral, PublicKeyToken=5651b03e12e42c12, processorArchitecture=MSIL">
       <HintPath>..\packages\NBuilder.3.0.1.1\lib\FizzWare.NBuilder.dll</HintPath>
@@ -95,7 +95,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.4.5.9\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ninject, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.2.2.1.4\lib\net40-Full\Ninject.dll</HintPath>
@@ -107,9 +107,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Prowlin, Version=0.9.4163.39219, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Prowlin, Version=0.9.4456.26422, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Prowlin 0.9.4163.39219\Prowlin.dll</HintPath>
+      <HintPath>..\packages\Prowlin.0.9.4456.26422\lib\net40\Prowlin.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -118,11 +118,11 @@
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\packages\SqlServerCompact.4.0.8482.1\lib\System.Data.SqlServerCe.dll</HintPath>
+      <HintPath>..\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\EntityFramework.SqlServerCompact.4.1.8482.2\lib\System.Data.SqlServerCe.Entity.dll</HintPath>
+      <Private>True</Private>
+      <HintPath>..\packages\EntityFramework.SqlServerCompact.4.3.6\lib\net40\System.Data.SqlServerCe.Entity.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
@@ -139,6 +139,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HelperTests\XElementHelperTests\ConvertToTFixture.cs" />
+    <Compile Include="IndexerTests\NzbxFixture.cs" />
+    <Compile Include="JobTests\RenameSeasonJobFixture.cs" />
+    <Compile Include="ProviderTests\RootDirProviderTests\FreeSpaceOnDrivesFixture.cs" />
+    <Compile Include="ProviderTests\SearchProviderTests\GetSeriesTitleFixture.cs" />
+    <Compile Include="ProviderTests\TvRageMappingProviderTests\FindMatchingTvRageSeriesFixture.cs" />
+    <Compile Include="ProviderTests\TvRageMappingProviderTests\ProcessResultsFixture.cs" />
+    <Compile Include="ProviderTests\TvRageProviderTests\GetSeriesFixture.cs" />
+    <Compile Include="HelperTests\XElementHelperTests\ConvertToDayOfWeekFixture.cs" />
+    <Compile Include="ProviderTests\TvRageProviderTests\GetUtcOffsetFixture.cs" />
+    <Compile Include="ProviderTests\TvRageProviderTests\SearchSeriesFixture.cs" />
     <Compile Include="QualityTypesTest.cs" />
     <Compile Include="EpisodeParseResultTest.cs" />
     <Compile Include="Integeration\ServiceIntegerationFixture.cs" />
@@ -170,9 +181,9 @@
     <Compile Include="ProviderTests\PlexProviderTest.cs" />
     <Compile Include="ProviderTests\SeasonProviderTest.cs" />
     <Compile Include="ProviderTests\DecisionEngineTests\RetentionSpecificationFixture.cs" />
-    <Compile Include="ProviderTests\DecisionEngineTests\QualityAllowedByProfileSpecificationFixtrue.cs" />
-    <Compile Include="ProviderTests\DecisionEngineTests\UpgradeHistorySpecificationFixtrue.cs" />
-    <Compile Include="ProviderTests\DecisionEngineTests\UpgradeDiskSpecificationFixtrue.cs" />
+    <Compile Include="ProviderTests\DecisionEngineTests\QualityAllowedByProfileSpecificationFixture.cs" />
+    <Compile Include="ProviderTests\DecisionEngineTests\UpgradeHistorySpecificationFixture.cs" />
+    <Compile Include="ProviderTests\DecisionEngineTests\UpgradeDiskSpecificationFixture.cs" />
     <Compile Include="ProviderTests\DecisionEngineTests\QualityUpgradeSpecificationFixture.cs" />
     <Compile Include="ProviderTests\DecisionEngineTests\UpgradePossibleSpecificationFixture.cs" />
     <Compile Include="ProviderTests\DownloadClientTests\BlackholeProviderFixture.cs" />
@@ -199,7 +210,7 @@
     <Compile Include="ProviderTests\XemCommunicationProviderTests\GetSceneTvdbMappingsFixture.cs" />
     <Compile Include="ProviderTests\XemCommunicationProviderTests\GetXemSeriesIdsFixture.cs" />
     <Compile Include="Services\ParseErrorServiceFixture.cs" />
-    <Compile Include="SortHelperTest.cs" />
+    <Compile Include="HelperTests\SortHelperFixture.cs" />
     <Compile Include="ProviderTests\EpisodeProviderTests\EpisodeProviderTest_DeleteInvalidEpisodes.cs" />
     <Compile Include="ProviderTests\DecisionEngineTests\AcceptableSizeSpecificationFixture.cs" />
     <Compile Include="ProviderTests\QualityTypeProviderTest.cs" />
@@ -223,11 +234,11 @@
     <Compile Include="EpisodeStatusTest.cs" />
     <Compile Include="JobTests\ImportNewSeriesJobTest.cs" />
     <Compile Include="JobTests\DiskScanJobTest.cs" />
-    <Compile Include="IndexerTests.cs" />
+    <Compile Include="IndexerTests\IndexerFixture.cs" />
     <Compile Include="ProviderTests\DecisionEngineTests\AllowedDownloadSpecificationFixture.cs" />
     <Compile Include="ProviderTests\JobProviderTests\JobProviderFixture.cs" />
     <Compile Include="QualityTest.cs" />
-    <Compile Include="ProviderTests\RootDirProviderTest.cs" />
+    <Compile Include="ProviderTests\RootDirProviderTests\RootDirProviderFixture.cs" />
     <Compile Include="ProviderTests\IndexerProviderTest.cs" />
     <Compile Include="ProviderTests\HistoryProviderTest.cs" />
     <Compile Include="ProviderTests\MediaFileProviderTest.cs" />
@@ -241,6 +252,7 @@
     <Compile Include="ProviderTests\SceneMappingProviderTest.cs" />
     <Compile Include="ProviderTests\SeriesProviderTest.cs" />
     <Compile Include="ProviderTests\TvDbProviderTest.cs" />
+    <Compile Include="XbmcVersionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Common\NzbDrone.Common.csproj">
@@ -278,10 +290,22 @@
     <Content Include="Files\JsonError.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Files\RSS\nzbx_search.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Files\RSS\nzbx_recent.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="Files\RSS\omgwtfnzbs.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Files\RSS\nzbclub.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Files\RSS\nzbindex.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\RSS\SizeParsing\omgwtfnzbs.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Files\RSS\SizeParsing\nzbclub.xml">
@@ -300,31 +324,13 @@
     <Content Include="Files\RSS\newznab.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Files\RSS\newbin_none_english.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Files\Categories_json.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Files\RSS\SizeParsing\newzbin.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Files\RSS\SizeParsing\newznab.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Files\RSS\SizeParsing\nzbmatrix.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Files\RSS\SizeParsing\nzbsrus.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Files\Feed.nzbmatrix.com.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Files\RSS\newzbin.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Files\RSS\nzbmatrix.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Files\RSS\nzbsrus.xml">
@@ -339,6 +345,21 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="Files\TvRage\SeriesInfo_empty.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\TvRage\SeriesInfo_one.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\TvRage\SearchResults_one.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\TvRage\SearchResults_many.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\TvRage\SearchResults_empty.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Files\Xem\Ids.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -355,6 +376,12 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Files\RSS\SizeParsing\nzbx_recent.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Files\RSS\SizeParsing\nzbx_search.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Files\SceneMappings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -370,9 +397,8 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-xcopy /s /y "$(SolutionDir)packages\SqlServerCompact.4.0.8482.1\NativeBinaries\x86\*.*" "$(TargetDir)"
-</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(TargetDir)x86" md "$(TargetDir)x86"
+xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\x86\*.*" "$(TargetDir)x86"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Providers
 
             var series = _seriesProvider.GetSeries(episodeFile.SeriesId);
             var episodes = _episodeProvider.GetEpisodesByFileId(episodeFile.EpisodeFileId);
-            string newFileName = _mediaFileProvider.GetNewFilename(episodes, series.Title, episodeFile.Quality, episodeFile.Proper, episodeFile);
+            string newFileName = _mediaFileProvider.GetNewFilename(episodes, series, episodeFile.Quality, episodeFile.Proper, episodeFile);
             var newFile = _mediaFileProvider.CalculateFilePath(series, episodes.First().SeasonNumber, newFileName, Path.GetExtension(episodeFile.Path));
 
             //Only rename if existing and new filenames don't match
@@ -197,8 +197,17 @@ namespace NzbDrone.Core.Providers
 
             Logger.Debug("Moving [{0}] > [{1}]", episodeFile.Path, newFile.FullName);
             _diskProvider.MoveFile(episodeFile.Path, newFile.FullName);
-            
-            _diskProvider.InheritFolderPermissions(newFile.FullName);
+
+            //Wrapped in Try/Catch to prevent this from causing issues with remote NAS boxes, the move worked, which is more important.
+            try
+            {
+                _diskProvider.InheritFolderPermissions(newFile.FullName);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Debug("Unable to apply folder permissions to: ", newFile.FullName);
+                Logger.TraceException(ex.Message, ex);
+            }
 
             episodeFile.Path = newFile.FullName;
             _mediaFileProvider.Update(episodeFile);

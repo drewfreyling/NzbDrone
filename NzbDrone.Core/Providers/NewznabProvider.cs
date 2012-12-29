@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Providers
             foreach(var newznabDefinition in definitionsList)
             {
                 CheckHostname(newznabDefinition.Url);
-                newznabDefinition.Url = new Uri(newznabDefinition.Url).ParentUriString();
+                //newznabDefinition.Url = new Uri(newznabDefinition.Url).ParentUriString();
             }
 
             _database.UpdateMany(definitionsList);
@@ -140,6 +140,7 @@ namespace NzbDrone.Core.Providers
             catch (Exception ex)
             {
                 Logger.Error("Invalid address {0}, please correct the site URL.", url);
+                Logger.TraceException(ex.Message, ex);
                 throw;
             }
 

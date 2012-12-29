@@ -4,6 +4,7 @@ using System.IO;
 using Ninject;
 using NLog;
 using NzbDrone.Common;
+using NzbDrone.Core.Model;
 using NzbDrone.Core.Providers.Core;
 using NzbDrone.Core.Repository;
 using PetaPoco;
@@ -24,8 +25,6 @@ namespace NzbDrone.Core.Providers
             _diskProvider = diskProvider;
             _seriesProvider = seriesProvider;
         }
-
-        #region IRootDirProvider
 
         public virtual List<RootDir> GetAll()
         {
@@ -51,7 +50,7 @@ namespace NzbDrone.Core.Providers
             _database.Delete<RootDir>(rootDirId);
         }
 
-        public List<String> GetUnmappedFolders(string path)
+        public virtual List<String> GetUnmappedFolders(string path)
         {
             Logger.Debug("Generating list of unmapped folders");
             if (String.IsNullOrEmpty(path))
@@ -77,26 +76,42 @@ namespace NzbDrone.Core.Providers
             return results;
         }
 
-        public virtual string GetMostFreeRootDir()
+        public virtual List<RootDir> AllWithFreeSpace()
         {
-            ulong maxSize = 0;
-            var maxPath = String.Empty;
-
             var rootDirs = GetAll();
 
             foreach (var rootDir in rootDirs)
             {
                 rootDir.FreeSpace = _diskProvider.FreeDiskSpace(new DirectoryInfo(rootDir.Path));
-                if (rootDir.FreeSpace > maxSize)
+            }
+
+            return rootDirs;
+        }
+
+        public virtual Dictionary<string, ulong> FreeSpaceOnDrives()
+        {
+            var freeSpace = new Dictionary<string, ulong>();
+
+            var rootDirs = GetAll();
+
+            foreach (var rootDir in rootDirs)
+            {
+                var pathRoot = _diskProvider.GetPathRoot(rootDir.Path);
+
+                if(!freeSpace.ContainsKey(pathRoot))
                 {
-                    maxPath = rootDir.Path;
-                    maxSize = rootDir.FreeSpace;
+                    try
+                    {
+                        freeSpace.Add(pathRoot, _diskProvider.FreeDiskSpace(new DirectoryInfo(rootDir.Path)));
+                    }
+                    catch(Exception ex)
+                    {
+                        Logger.WarnException("Error getting fromm space for: " + pathRoot, ex);
+                    }
                 }
             }
 
-            return maxPath;
+            return freeSpace;
         }
-
-        #endregion
     }
 }

@@ -193,8 +193,8 @@ namespace NzbDrone.Common
 
         public virtual ulong FreeDiskSpace(DirectoryInfo directoryInfo)
         {
-            if (!directoryInfo.Exists)
-                throw new DirectoryNotFoundException();
+            if(!directoryInfo.Exists)
+                throw new DirectoryNotFoundException(directoryInfo.FullName);
 
             ulong freeBytesAvailable;
             ulong totalNumberOfBytes;
@@ -274,6 +274,11 @@ namespace NzbDrone.Common
                 return true;
 
             return false;
+        }
+
+        public virtual string GetPathRoot(string path)
+        {
+            return Path.GetPathRoot(path);
         }
     }
 }

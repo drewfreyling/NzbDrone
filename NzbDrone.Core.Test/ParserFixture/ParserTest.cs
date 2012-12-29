@@ -13,8 +13,8 @@ using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.ParserFixture
 {
-    [TestFixture]
     // ReSharper disable InconsistentNaming
+    [TestFixture]
     public class ParserTest : CoreTest
     {
         /*Fucked-up hall of shame,
@@ -71,6 +71,11 @@ namespace NzbDrone.Core.Test.ParserFixture
         [TestCase("Falling_Skies_-_1x1_-_Live_and_Learn_[HDTV]", "Falling Skies", 1, 1)]
         [TestCase("Top Gear - 07x03 - 2005.11.70", "Top Gear", 7, 3)]
         [TestCase("Hatfields and McCoys 2012 Part 1 REPACK 720p HDTV x264 2HD", "Hatfields and McCoys 2012", 1, 1)]
+        [TestCase("Glee.S04E09.Swan.Song.1080p.WEB-DL.DD5.1.H.264-ECI", "Glee", 4, 9)]
+        [TestCase("S08E20 50-50 Carla [DVD]", "", 8, 20)]
+        [TestCase("Cheers S08E20 50-50 Carla [DVD]", "Cheers", 8, 20)]
+        [TestCase("S02E10 6-50 to SLC [SDTV]", "", 2, 10)]
+        [TestCase("Franklin & Bash S02E10 6-50 to SLC [SDTV]", "Franklin & Bash", 2, 10)]
         public void ParseTitle_single(string postTitle, string title, int seasonNumber, int episodeNumber)
         {
             var result = Parser.ParseTitle(postTitle);
@@ -189,6 +194,7 @@ namespace NzbDrone.Core.Test.ParserFixture
         [TestCase("Parks.and.Recreation.S02.720p.x264-DIMENSION", "Parks.and.Recreation", 2)]
         [TestCase("The.Office.US.S03.720p.x264-DIMENSION", "The.Office.US", 3)]
         [TestCase(@"Sons.of.Anarchy.S03.720p.BluRay-CLUE\REWARD", "Sons.of.Anarchy", 3)]
+        [TestCase("Adventure Time S02 720p HDTV x264 CRON", "Adventure Time", 2)]
         public void full_season_release_parse(string postTitle, string title, int season)
         {
             var result = Parser.ParseTitle(postTitle);
@@ -285,6 +291,7 @@ namespace NzbDrone.Core.Test.ParserFixture
         [TestCase("The Daily Show With Jon Stewart -", "dailyshowwithjonstewart")]
         [TestCase("The Venture Bros. (2004)", "venturebros2004")]
         [TestCase("Castle (2011)", "castle2011")]
+        [TestCase("Adventure Time S02 720p HDTV x264 CRON", "adventuretime")]
         public void parse_series_name(string postTitle, string title)
         {
             var result = Parser.ParseSeriesName(postTitle);
@@ -392,6 +399,13 @@ namespace NzbDrone.Core.Test.ParserFixture
         public void parse_header(string title, string expected)
         {
             Parser.ParseHeader(title).Should().Be(expected);
+        }
+
+        [TestCase("password - \"bdc435cb-93c4-4902-97ea-ca00568c3887.337\" yEnc")]
+        public void should_not_parse_encypted_posts(string title)
+        {
+            Parser.ParseTitle(title).Should().BeNull();
+            ExceptionVerification.IgnoreWarns();
         }
     }
 }

@@ -33,20 +33,6 @@ namespace NzbDrone.Core.Providers.Core
             return _database.Fetch<Config>();
         }
 
-        public virtual String NzbMatrixUsername
-        {
-            get { return GetValue("NzbMatrixUsername"); }
-
-            set { SetValue("NzbMatrixUsername", value); }
-        }
-
-        public virtual String NzbMatrixApiKey
-        {
-            get { return GetValue("NzbMatrixApiKey"); }
-
-            set { SetValue("NzbMatrixApiKey", value); }
-        }
-
         public virtual String NzbsOrgUId
         {
             get { return GetValue("NzbsOrgUId"); }
@@ -73,20 +59,6 @@ namespace NzbDrone.Core.Providers.Core
             get { return GetValue("NzbsrusHash"); }
 
             set { SetValue("NzbsrusHash", value); }
-        }
-
-        public virtual String NewzbinUsername
-        {
-            get { return GetValue("NewzbinUsername"); }
-
-            set { SetValue("NewzbinUsername", value); }
-        }
-
-        public virtual String NewzbinPassword
-        {
-            get { return GetValue("NewzbinPassword"); }
-
-            set { SetValue("NewzbinPassword", value); }
         }
 
         public virtual String FileSharingTalkUid
@@ -145,18 +117,25 @@ namespace NzbDrone.Core.Providers.Core
             set { SetValue("SabTvCategory", value); }
         }
 
-        public virtual SabPriorityType SabTvPriority
+        public virtual SabPriorityType SabBacklogTvPriority
         {
-            get { return (SabPriorityType)GetValueInt("SabTvPriority"); }
+            get { return (SabPriorityType)GetValueInt("SabBacklogTvPriority"); }
 
-            set { SetValue("SabTvPriority", (int)value); }
+            set { SetValue("SabBacklogTvPriority", (int)value); }
         }
 
-        public virtual String SabDropDirectory
+        public virtual SabPriorityType SabRecentTvPriority
         {
-            get { return GetValue("SabTvDropDirectory"); }
+            get { return (SabPriorityType)GetValueInt("SabRecentTvPriority"); }
 
-            set { SetValue("SabTvDropDirectory", value); }
+            set { SetValue("SabRecentTvPriority", (int)value); }
+        }
+
+        public virtual String DownloadClientTvDirectory
+        {
+            get { return GetValue("DownloadClientTvDirectory"); }
+
+            set { SetValue("DownloadClientTvDirectory", value); }
         }
 
         public virtual bool SortingIncludeSeriesName
@@ -538,6 +517,25 @@ namespace NzbDrone.Core.Providers.Core
             set { SetValue("RssSyncInterval", value); }
         }
 
+        public virtual string OmgwtfnzbsUsername
+        {
+            get { return GetValue("OmgwtfnzbsUsername", String.Empty); }
+            set { SetValue("OmgwtfnzbsUsername", value); }
+        }
+
+        public virtual string OmgwtfnzbsApiKey
+        {
+            get { return GetValue("OmgwtfnzbsApiKey", String.Empty); }
+            set { SetValue("OmgwtfnzbsApiKey", value); }
+        }
+
+        public virtual Boolean IgnoreArticlesWhenSortingSeries
+        {
+            get { return GetValueBoolean("IgnoreArticlesWhenSortingSeries", true); }
+
+            set { SetValue("IgnoreArticlesWhenSortingSeries", value); }
+        }
+
         private string GetValue(string key)
         {
             return GetValue(key, String.Empty);
@@ -556,7 +554,6 @@ namespace NzbDrone.Core.Providers.Core
         public virtual string GetValue(string key, object defaultValue, bool persist = false)
         {
             EnsureCache();
-
 
             string dbValue;
 
