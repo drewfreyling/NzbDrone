@@ -42,6 +42,7 @@ ipch/
 *.aps
 *.ncb
 *.opensdf
+[Rr]esult[s]
 *.sdf
 
 # Visual Studio profiler
@@ -111,6 +112,9 @@ UpgradeLog*.XML
 # SQL Server files
 App_Data/*.mdf
 App_Data/*.ldf
+
+# Git Files
+*.orig
 
 # Tools
 _NCrunch_*

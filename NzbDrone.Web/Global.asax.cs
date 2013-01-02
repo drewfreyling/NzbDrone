@@ -9,12 +9,17 @@ using System.Web.Routing;
 using LowercaseRoutesMVC;
 using NLog.Config;
 using Ninject;
-using Ninject.Web.Mvc;
+using Ninject.Web.Common;
 using NLog;
+using NzbDrone.Api;
 using NzbDrone.Common;
 using NzbDrone.Core;
+using ServiceStack.CacheAccess;
+using ServiceStack.CacheAccess.Providers;
 using NzbDrone.Core.Repository.Quality;
 using NzbDrone.Web.Helpers.Binders;
+using ServiceStack.ServiceInterface;
+using SignalR;
 
 namespace NzbDrone.Web
 {
@@ -24,10 +29,11 @@ namespace NzbDrone.Web
 
         public static void RegisterRoutes(RouteCollection routes)
         {
+            routes.IgnoreRoute("api/{*pathInfo}");
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             routes.IgnoreRoute("{*robotstxt}", new { robotstxt = @"(.*/)?robots.txt(/.*)?" });
             routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
-
+            
             routes.MapRouteLowercase(
                 name: "WithSeasonNumber",
                 url: "{controller}/{action}/{seriesId}/{seasonNumber}"
@@ -41,8 +47,9 @@ namespace NzbDrone.Web
         }
 
         protected override void OnApplicationStarted()
-        {          
+        {
             base.OnApplicationStarted();
+
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
 
@@ -64,6 +71,15 @@ namespace NzbDrone.Web
             dispatch.DedicateToHost();
 
             dispatch.Kernel.Load(Assembly.GetExecutingAssembly());
+
+            //SignalR
+            RouteTable.Routes.MapHubs();
+
+            //ServiceStack
+            dispatch.Kernel.Bind<ICacheClient>().To<MemoryCacheClient>().InSingletonScope();
+            dispatch.Kernel.Bind<ISessionFactory>().To<SessionFactory>().InSingletonScope();
+            new AppHost(dispatch.Kernel).Init();
+
             return dispatch.Kernel;
         }
 

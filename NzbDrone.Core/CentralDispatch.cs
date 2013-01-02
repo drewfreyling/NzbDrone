@@ -19,7 +19,6 @@ using PetaPoco;
 using SignalR;
 using SignalR.Hosting.AspNet;
 using SignalR.Infrastructure;
-using SignalR.Ninject;
 using Connection = NzbDrone.Core.Datastore.Connection;
 using Xbmc = NzbDrone.Core.Providers.ExternalNotification.Xbmc;
 
@@ -39,8 +38,7 @@ namespace NzbDrone.Core
             logger.Debug("Initializing Kernel:");
             Kernel = new StandardKernel();
 
-            var resolver = new NinjectDependencyResolver(Kernel);
-            AspNetHost.SetResolver(resolver);
+            GlobalHost.DependencyResolver = new NinjectDependencyResolver(Kernel);
 
             InitDatabase();
             InitReporting();
