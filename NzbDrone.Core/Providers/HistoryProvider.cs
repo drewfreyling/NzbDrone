@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DataTables.Mvc.Core.Helpers;
 using DataTables.Mvc.Core.Models;
-using Ninject;
 using NLog;
 using NzbDrone.Core.Model;
 using NzbDrone.Core.Repository;
@@ -17,7 +16,6 @@ namespace NzbDrone.Core.Providers
         private readonly IDatabase _database;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        [Inject]
         public HistoryProvider(IDatabase database)
         {
             _database = database;

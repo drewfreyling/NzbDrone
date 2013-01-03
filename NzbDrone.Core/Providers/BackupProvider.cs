@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Ionic.Zip;
 using NLog;
-using Ninject;
 using NzbDrone.Common;
 using NzbDrone.Common.Model;
 
@@ -15,7 +14,6 @@ namespace NzbDrone.Core.Providers
         private readonly DiskProvider _diskProvider;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
       
-        [Inject]
         public BackupProvider(EnvironmentProvider environmentProvider, DiskProvider diskProvider)
         {
             _environmentProvider = environmentProvider;
