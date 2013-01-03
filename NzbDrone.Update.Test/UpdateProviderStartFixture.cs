@@ -13,11 +13,11 @@ namespace NzbDrone.Update.Test
     [TestFixture]
     class UpdateProviderStartFixture : TestBase
     {
-        private const string UPDATE_FOLDER = @"C:\Temp\nzbdrone_update\nzbdrone\";
-        private const string BACKUP_FOLDER = @"C:\Temp\nzbdrone_update\nzbdrone_backup\";
-        private const string SANDBOX_LOG_FOLDER = @"C:\Temp\nzbdrone_update\UpdateLogs\";
-        private const string TARGET_FOLDER = @"C:\NzbDrone\";
-        private const string UPDATE_LOG_FOLDER = @"C:\NzbDrone\UpdateLogs\";
+        private const string UPDATE_FOLDER = @"C:\Temp\nzbdrone_update\nzbdrone";
+        private const string BACKUP_FOLDER = @"C:\Temp\nzbdrone_update\nzbdrone_backup";
+        private const string SANDBOX_LOG_FOLDER = @"C:\Temp\nzbdrone_update\UpdateLogs";
+        private const string TARGET_FOLDER = @"C:\NzbDrone";
+        private const string UPDATE_LOG_FOLDER = @"C:\NzbDrone\UpdateLogs";
 
         Mock<EnvironmentProvider> _environmentProvider;
 
@@ -28,7 +28,7 @@ namespace NzbDrone.Update.Test
 
             _environmentProvider = Mocker.GetMock<EnvironmentProvider>();
 
-            _environmentProvider.SetupGet(c => c.SystemTemp).Returns(@"C:\Temp\");
+            _environmentProvider.SetupGet(c => c.SystemTemp).Returns(@"C:\Temp");
 
             Mocker.GetMock<DiskProvider>()
                .Setup(c => c.FolderExists(UPDATE_FOLDER))
@@ -242,9 +242,7 @@ namespace NzbDrone.Update.Test
                 .Verify(c => c.Start(It.IsAny<string>()), Times.Never());
 
             Mocker.GetMock<ProcessProvider>()
-                .Verify(c => c.Start(TARGET_FOLDER + "nzbdrone.exe"), Times.Once());
+                .Verify(c => c.Start(Path.Combine(TARGET_FOLDER, "nzbdrone.exe")), Times.Once());
         }
-
-
     }
 }

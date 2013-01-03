@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.JobTests
     [TestFixture]
     internal class AppUpdateJobFixture : CoreTest
     {
-        private const string SANDBOX_FOLDER = @"C:\Temp\nzbdrone_update\";
+        private const string SANDBOX_FOLDER = @"C:\Temp\nzbdrone_update";
 
         private readonly Guid _clientGuid = Guid.NewGuid();
 
@@ -33,11 +33,10 @@ namespace NzbDrone.Core.Test.JobTests
         [SetUp]
         public void Setup()
         {
-            Mocker.GetMock<EnvironmentProvider>().SetupGet(c => c.SystemTemp).Returns(@"C:\Temp\");
+            Mocker.GetMock<EnvironmentProvider>().SetupGet(c => c.SystemTemp).Returns(@"C:\Temp");
             Mocker.GetMock<ConfigFileProvider>().SetupGet(c => c.Guid).Returns(_clientGuid);
             Mocker.GetMock<UpdateProvider>().Setup(c => c.GetAvilableUpdate(It.IsAny<Version>())).Returns(updatePackage);
         }
-
 
         [Test]
         public void should_delete_sandbox_before_update_if_folder_exists()
@@ -62,7 +61,6 @@ namespace NzbDrone.Core.Test.JobTests
             //Assert
             Mocker.GetMock<DiskProvider>().Verify(c => c.DeleteFolder(SANDBOX_FOLDER, true), Times.Never());
         }
-
 
         [Test]
         public void Should_download_update_package()

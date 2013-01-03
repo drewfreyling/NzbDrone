@@ -52,7 +52,7 @@ namespace NzbDrone.Common.Test
         [Test]
         public void AppDataDirectory_path_test()
         {
-            GetEnviromentProvider().GetAppDataPath().Should().BeEquivalentTo(@"C:\NzbDrone\NzbDrone.Web\App_Data\");
+            GetEnviromentProvider().GetAppDataPath().Should().BeEquivalentTo(@"C:\NzbDrone\NzbDrone.Web\App_Data");
         }
 
 
@@ -83,19 +83,19 @@ namespace NzbDrone.Common.Test
         [Test]
         public void Sanbox()
         {
-            GetEnviromentProvider().GetUpdateSandboxFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\");
+            GetEnviromentProvider().GetUpdateSandboxFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update");
         }
 
         [Test]
         public void GetUpdatePackageFolder()
         {
-            GetEnviromentProvider().GetUpdatePackageFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\NzbDrone\");
+            GetEnviromentProvider().GetUpdatePackageFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\NzbDrone");
         }
 
         [Test]
         public void GetUpdateClientFolder()
         {
-            GetEnviromentProvider().GetUpdateClientFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\NzbDrone\NzbDrone.Update\");
+            GetEnviromentProvider().GetUpdateClientFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\NzbDrone\NzbDrone.Update");
         }
 
         [Test]
@@ -107,13 +107,13 @@ namespace NzbDrone.Common.Test
         [Test]
         public void GetSandboxLogFolder()
         {
-            GetEnviromentProvider().GetSandboxLogFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\UpdateLogs\");
+            GetEnviromentProvider().GetSandboxLogFolder().Should().BeEquivalentTo(@"C:\Temp\Nzbdrone_update\UpdateLogs");
         }
 
         [Test]
         public void GetUpdateLogFolder()
         {
-            GetEnviromentProvider().GetUpdateLogFolder().Should().BeEquivalentTo(@"C:\NzbDrone\UpdateLogs\");
+            GetEnviromentProvider().GetUpdateLogFolder().Should().BeEquivalentTo(@"C:\NzbDrone\UpdateLogs");
         }
     }
 }
