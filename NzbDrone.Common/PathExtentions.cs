@@ -6,8 +6,8 @@ namespace NzbDrone.Common
 {
     public static class PathExtentions
     {
-        private const string WEB_FOLDER = "NzbDrone.Web\\";
-        private const string APP_DATA = "App_Data\\";
+        private const string WEB_FOLDER = "NzbDrone.Web";
+        private const string APP_DATA = "App_Data";
         public const string IIS_FOLDER = "IISExpress";
         public const string IIS_EXE = "iisexpress.exe";
 
@@ -22,12 +22,12 @@ namespace NzbDrone.Common
 
         private const string BACKUP_ZIP_FILE = "NzbDrone_Backup.zip";
 
-        private const string UPDATE_SANDBOX_FOLDER_NAME = "nzbdrone_update\\";
-        private const string UPDATE_PACKAGE_FOLDER_NAME = "nzbdrone\\";
-        private const string UPDATE_BACKUP_FOLDER_NAME = "nzbdrone_backup\\";
+        private const string UPDATE_SANDBOX_FOLDER_NAME = "nzbdrone_update";
+        private const string UPDATE_PACKAGE_FOLDER_NAME = "nzbdrone";
+        private const string UPDATE_BACKUP_FOLDER_NAME = "nzbdrone_backup";
         private const string UPDATE_CLIENT_EXE = "nzbdrone.update.exe";
-        private const string UPDATE_CLIENT_FOLDER_NAME = "NzbDrone.Update\\";
-        private const string UPDATE_LOG_FOLDER_NAME = "UpdateLogs\\";
+        private const string UPDATE_CLIENT_FOLDER_NAME = "NzbDrone.Update";
+        private const string UPDATE_LOG_FOLDER_NAME = "UpdateLogs";
 
         public static string NormalizePath(this string path)
         {
