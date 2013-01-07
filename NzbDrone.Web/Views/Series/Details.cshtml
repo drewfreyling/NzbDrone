@@ -6,64 +6,7 @@
 @section HeaderContent
 {
     @Html.IncludeCss("Settings.css")
-    <style>
-        .seasonToggleTopGroup
-        {
-            overflow: hidden;
-        }
-    
-        .seasonToggleTop
-        {
-            background-color: #F0F5FF;
-            background-position: 5px center;
-            background-repeat: no-repeat;
-            display: inline-block;
-            font-size: 15px;
-            margin: 2px;
-            padding: 2px 5px;
-            width: 100px;
-        }
-    
-        .seasonToggleLabel
-        {
-            margin-left: 5px;
-            color: black;
-            text-decoration: none;
-            vertical-align: middle;
-        }
-        
-        .seasonToggleLabel:hover {
-            color: #065EFE;
-        }
-        
-        .seasonToggleTop .ignoredEpisodesMaster
-        {
-            padding-left: 0px;
-            padding-right: 0px;
-            border-style: none;
-        }
-    
-        #banner-container
-        {
-            width: 758px;
-            height: 140px;
-            padding: 0px;
-            margin-top: 10px;
-            margin-bottom: 15px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-   
-        .seasonSection
-        {
-            margin-top: 50px;
-        }
-        
-        .ui-dialog-buttonpane .ui-dialog-buttonset .ui-delete-button
-        {
-            margin-right: 445px;
-        }
-    </style>
+    @Html.IncludeCss("SeriesDetails.css")
 }
 @{ ViewBag.Title = Model.Title; }
 

@@ -1,12 +1,9 @@
-﻿@model string
+﻿@using NzbDrone.Web.Helpers
+@model string
 @{ViewBag.Title = "Configuration";}
 
 @section HeaderContent{
-    <style>
-        #configGrid td {
-            padding: 2px 8px 2px 8px;
-        }
-    </style>
+    @Html.IncludeCss("System.css")
 }
 
 <div class="grid-container">

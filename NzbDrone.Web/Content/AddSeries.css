@@ -1,0 +1,47 @@
+﻿.existingSeries {
+    border-color: #f2f2f2;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #f2f2f2;
+    margin: 0px 10px 10px 0px;
+    padding: 5px;
+    display: block;
+}
+
+.masterQualitySelector {
+    left: 415px;
+    position: relative;
+}
+
+.start-date-master {
+    left: 430px;
+    position: relative;
+}
+    
+.seriesPathValue {
+    display: block;
+}
+    
+.existingSeriesContainer {
+    position: relative;
+}
+    
+.ui-autocomplete.seriesLookupResults {
+    max-height: 180px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+}
+    
+.tvDbLink {
+    float: right;
+}
+
+.tvDbLink:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+input[type=date].start-date {
+    margin-left: 10px;
+}

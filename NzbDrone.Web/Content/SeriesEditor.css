@@ -71,3 +71,7 @@ th .footer-control-start-date {
 #editToggleMaster {
     margin-left: 5px;
 }
+
+.settingsForm {
+    overflow: auto;
+}

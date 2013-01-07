@@ -1,0 +1,22 @@
+﻿/* Index */
+.controls {
+    width: 620px;
+    padding: 14px;
+}
+
+/* Config */
+#configGrid td {
+    padding: 2px 8px 2px 8px;
+}
+
+
+/* Logs */
+#logGrid td {
+    padding: 2px 8px 2px 8px;
+}
+
+
+/* Stats */
+label {
+    font-weight: bold;
+}

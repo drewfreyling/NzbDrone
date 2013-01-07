@@ -8,12 +8,20 @@ namespace NzbDrone.Web.Helpers
 {
     public static class ProfilerHelper
     {
+        private static Boolean? _enabled { get; set; }
+
         public static bool Enabled()
         {
-            var environmentProvider = new EnvironmentProvider();
-            var configFileProvider = new ConfigFileProvider(environmentProvider);
+            if(!_enabled.HasValue)
+            {
+                var environmentProvider = new EnvironmentProvider();
+                var configFileProvider = new ConfigFileProvider(environmentProvider);
 
-            return configFileProvider.EnableProfiler;
+                _enabled = configFileProvider.EnableProfiler;
+                return _enabled.Value;
+            }
+
+            return _enabled.Value;
         }
     }
 }

@@ -4,12 +4,7 @@
     Layout = null;
 }
 
-<style>
-    .settingsForm
-    {
-        overflow: auto;
-    }
-</style>
+@Html.IncludeCss("SeriesEditor.css")
 
 <div id="stylized" style="border-color: transparent;">
     @using (Html.BeginForm("Edit", "Series", FormMethod.Post, new { id = "SeriesEditorForm", name = "SeriesEditorForm", @class = "settingsForm" }))

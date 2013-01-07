@@ -1,4 +1,5 @@
-﻿@model NzbDrone.Core.Model.StatsModel
+﻿@using NzbDrone.Web.Helpers
+@model NzbDrone.Core.Model.StatsModel
 
 @{
     ViewBag.Title = "Stats";
@@ -6,12 +7,7 @@
 
 @section HeaderContent
 {
-    <style>
-        label
-        {
-            font-weight: bold;
-        }
-    </style>
+    @Html.IncludeCss("System.css")
 }
 
 @Html.LabelFor(m => m.SeriesTotal): 

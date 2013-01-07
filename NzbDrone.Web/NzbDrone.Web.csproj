@@ -198,10 +198,17 @@
     <Compile Include="App_Start\DataTablesMvc.cs" />
     <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="Controllers\SearchHistoryController.cs" />
+    <Compile Include="Exceptions\CssNotFoundException.cs" />
     <Compile Include="Helpers\Binders\QualityTypesBinder.cs" />
+    <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="Helpers\RenderActionHelper.cs" />
     <Compile Include="Helpers\Validation\RequiredIfAnyAttribute.cs" />
     <Compile Include="Helpers\Validation\RequiredIfAttribute.cs" />
+    <Content Include="Content\AddSeries.css" />
+    <Content Include="Content\Upcoming.css" />
+    <Content Include="Content\System.css" />
+    <Content Include="Content\Series.css" />
+    <Content Include="Content\SeriesDetails.css" />
     <Content Include="Content\DataTables-NzbDrone\media\images\sort_both.png" />
     <Content Include="Content\DataTables-NzbDrone\media\images\sort_desc_disabled.png" />
     <Content Include="Content\font-awesome-ie7.css" />

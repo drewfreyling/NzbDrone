@@ -5,12 +5,6 @@
     Layout = "_SettingsLayout.cshtml";
 }
 
-<style>
-    .indexerStatusContainer {
-        margin-left: 14px;
-    }
-</style>
-
 <div class="indexerStatusContainer">   
     @Html.CheckBox("nzbsRusStatus", @Model.NzbsRUsEnabled, new { @class = "indexerStatusButton" })
     <label for="nzbsRusStatus">NZBsRus</label>

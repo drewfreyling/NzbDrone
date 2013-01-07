@@ -66,6 +66,12 @@ namespace NzbDrone.Common
             set { SetValue("EnableProfiler", value); }
         }
 
+        public virtual string Theme
+        {
+            get { return GetValue("Theme", ""); }
+            set { SetValue("Theme", value); }
+        }
+
         public virtual int GetValueInt(string key, int defaultValue)
         {
             return Convert.ToInt32(GetValue(key, defaultValue));
@@ -95,7 +101,6 @@ namespace NzbDrone.Common
             //return the default value
             return defaultValue.ToString();
         }
-
 
         public virtual void SetValue(string key, object value)
         {

@@ -1,0 +1,9 @@
+﻿.gridControls {
+    float: right;
+    padding-top: 10px;
+    visibility: hidden;
+}
+        
+.sub-menu {
+    float: left;
+}

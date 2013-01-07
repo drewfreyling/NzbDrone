@@ -2,19 +2,6 @@
 @{
     Layout = "_SettingsLayout.cshtml";
 }
-<style>
-    #examples
-    {
-        margin-top: 5px;
-        margin-bottom: 20px;
-        padding-left: 20px;
-    }
-    
-    .settingsContainer
-    {
-        overflow: auto;
-    }
-</style>
 
 <div id="stylized">
     @using (Html.BeginForm("SaveNaming", "Settings", FormMethod.Post, new { id = "NamingForm", name = "NamingForm", @class = "settingsForm" }))

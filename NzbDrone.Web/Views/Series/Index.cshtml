@@ -4,53 +4,9 @@
 @section HeaderContent
 {
     @Html.IncludeCss("Settings.css")
+    @Html.IncludeCss("Series.css")
 }
-<style>  
-    .progressbar {
-        position:relative;
-        width: 125px; 
-        height: 20px;
-        background-color: transparent;
-        border: 1px solid #065EFE;
-        margin: 2px;
-    }
-    
-    .progressbar-text {
-        position: absolute;
-        display: block;
-        width: 100%;
-        text-align: center;
-    }
 
-    .ui-progressbar-value {
-        overflow: hidden;
-        border: 1px solid #065EFE;
-    }
-
-    .ui-progressbar-value .progressbar-text {
-        position: relative;
-        font-weight: normal;
-        color: white;
-    }
-    
-    /* Set the row height so it won't resize when the progress bar is created */
-    .seriesTable tr
-    {
-        height: 28px;
-    }
-       
-    .commandsColumn, .statusColumn
-    {
-        text-align: center;
-        white-space: nowrap;
-    }
-    
-    .ui-dialog-buttonpane .ui-dialog-buttonset .ui-delete-button
-    {
-        margin-right: 445px;
-    }
-    
-</style>
 @section ActionMenu{
     <ul class="sub-menu">
         <li>@Html.ActionLink("Add Series", "Index", "AddSeries", null, new { Title = "Add a new or existing series" })</li>
