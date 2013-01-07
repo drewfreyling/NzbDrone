@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using NzbDrone.Common;
 using NzbDrone.Web.Exceptions;
@@ -32,18 +33,23 @@ namespace NzbDrone.Web.Helpers
 
             var theme = ThemeHelper.GetTheme();
 
+            locations.Add(String.Format("/Content/{0}", filename));
+
             if(!String.IsNullOrWhiteSpace(theme))
             {
                 locations.Add(String.Format("/Themes/{0}/Content/{1}", theme, filename));
             }
 
-            locations.Add(String.Format("/Content/{0}", filename));
+            var result = new StringBuilder();
 
             foreach(var location in locations)
             {
-                if (FileExists(helper, location))
-                    return MvcHtmlString.Create(String.Format("<link type='text/css' rel='stylesheet' href='{0}?{1}'/>", location, versionString));
+                if(FileExists(helper, location))
+                    result.AppendLine(String.Format("/Content/{0}", filename));
             }
+
+            if (result.Length > 0)
+                MvcHtmlString.Create(result.ToString());
 
             if (!isProduction)
                 throw new CssNotFoundException(String.Format("CSS not found: {0}\r\n\r\nLocations checked: \r\n{1}", filename, String.Join("\r\n", locations)));
