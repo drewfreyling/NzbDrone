@@ -45,11 +45,11 @@ namespace NzbDrone.Web.Helpers
             foreach(var location in locations)
             {
                 if(FileExists(helper, location))
-                    result.AppendLine(String.Format("/Content/{0}", filename));
+                    result.AppendLine(String.Format("<link type='text/css' rel='stylesheet' href='{0}?{1}'/>", location, versionString));
             }
 
             if (result.Length > 0)
-                MvcHtmlString.Create(result.ToString());
+                return MvcHtmlString.Create(result.ToString());
 
             if (!isProduction)
                 throw new CssNotFoundException(String.Format("CSS not found: {0}\r\n\r\nLocations checked: \r\n{1}", filename, String.Join("\r\n", locations)));
