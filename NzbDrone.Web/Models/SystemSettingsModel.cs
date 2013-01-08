@@ -22,11 +22,17 @@ namespace NzbDrone.Web.Models
         [Description("Secure the server with authentication?")]
         public AuthenticationType AuthenticationType { get; set; }
 
-        public SelectList AuthTypeSelectList { get; set; }
-
         [DisplayName("Recycle Bin")]
         [Description("Path to NzbDrone's internal recycle bin (optional)")]
         [DisplayFormat(ConvertEmptyStringToNull = false)]
         public string RecycleBin { get; set; }
+
+        [DisplayName("Theme")]
+        [Description("Choose another theme for NzbDrone")]
+        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        public string Theme { get; set; }
+
+        public SelectList AuthTypeSelectList { get; set; }
+        public SelectList ThemeSelectList { get; set; }
     }
 }

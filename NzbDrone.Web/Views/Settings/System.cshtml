@@ -35,10 +35,11 @@
         </label>
         @Html.TextBoxFor(m => m.RecycleBin, new { @class = "inputClass folderLookup" })
 
-        <label class="labelClass"> Backup Configuration
-            <span class="small">Backup your Configuration file and Database</span>
+        <label class="labelClass">@Html.LabelFor(m => m.Theme)
+            <span class="small">@Html.DescriptionFor(m => m.Theme)</span>
+            <span class="small">@Html.ValidationMessageFor(m => m.Theme)</span>
         </label>
-        <input type="button" value="Backup Now" onclick="window.location='../System/Backup'; return false;" class="inputClass" />
+        @Html.DropDownListFor(m => m.Theme, Model.ThemeSelectList, new { @class = "inputClass" })
         
         <button type="submit" class="save_button" disabled="disabled">
             Save</button>

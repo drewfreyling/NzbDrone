@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Web.Mvc;
 using NzbDrone.Common;
 
 namespace NzbDrone.Web.Helpers
@@ -12,8 +13,7 @@ namespace NzbDrone.Web.Helpers
         {
             if(String.IsNullOrWhiteSpace(Theme))
             {
-                var environmentProvider = new EnvironmentProvider();
-                var configFileProvider = new ConfigFileProvider(environmentProvider);
+                var configFileProvider = DependencyResolver.Current.GetService<ConfigFileProvider>();
 
                 Theme = configFileProvider.Theme;
                 return Theme;

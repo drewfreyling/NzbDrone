@@ -53,9 +53,9 @@ namespace NzbDrone.Web
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
 
-            var razor = ViewEngines.Engines.Single(e => e is RazorViewEngine);
+            //var razor = ViewEngines.Engines.Single(e => e is RazorViewEngine);
             ViewEngines.Engines.Clear();
-            ViewEngines.Engines.Add(razor);
+            ViewEngines.Engines.Add(new NzbDroneViewEngine());
 
             ModelBinders.Binders.Add(typeof(QualityTypes), new QualityTypesBinder());
 

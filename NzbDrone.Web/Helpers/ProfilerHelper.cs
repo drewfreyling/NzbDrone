@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using NzbDrone.Common;
 
 namespace NzbDrone.Web.Helpers
@@ -14,8 +15,7 @@ namespace NzbDrone.Web.Helpers
         {
             if(!_enabled.HasValue)
             {
-                var environmentProvider = new EnvironmentProvider();
-                var configFileProvider = new ConfigFileProvider(environmentProvider);
+                var configFileProvider = DependencyResolver.Current.GetService<ConfigFileProvider>();
 
                 _enabled = configFileProvider.EnableProfiler;
                 return _enabled.Value;

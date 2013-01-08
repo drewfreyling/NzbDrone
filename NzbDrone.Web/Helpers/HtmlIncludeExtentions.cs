@@ -35,7 +35,7 @@ namespace NzbDrone.Web.Helpers
 
             locations.Add(String.Format("/Content/{0}", filename));
 
-            if(!String.IsNullOrWhiteSpace(theme))
+            if (theme.Equals("Default", StringComparison.InvariantCultureIgnoreCase))
             {
                 locations.Add(String.Format("/Themes/{0}/Content/{1}", theme, filename));
             }

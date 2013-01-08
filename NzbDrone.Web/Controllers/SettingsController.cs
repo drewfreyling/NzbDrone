@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using NLog;
@@ -34,6 +35,8 @@ namespace NzbDrone.Web.Controllers
         private readonly NewznabProvider _newznabProvider;
         private readonly MetadataProvider _metadataProvider;
         private readonly JobProvider _jobProvider;
+        private readonly DiskProvider _diskProvider;
+        private readonly EnvironmentProvider _environmentProvider;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -42,7 +45,8 @@ namespace NzbDrone.Web.Controllers
                                     SeriesProvider seriesProvider, ExternalNotificationProvider externalNotificationProvider,
                                     QualityTypeProvider qualityTypeProvider, ConfigFileProvider configFileProvider, 
                                     NewznabProvider newznabProvider, MetadataProvider metadataProvider,
-                                    JobProvider jobProvider)
+                                    JobProvider jobProvider, DiskProvider diskProvider,
+                                    EnvironmentProvider environmentProvider)
         {
             _externalNotificationProvider = externalNotificationProvider;
             _qualityTypeProvider = qualityTypeProvider;
@@ -50,6 +54,8 @@ namespace NzbDrone.Web.Controllers
             _newznabProvider = newznabProvider;
             _metadataProvider = metadataProvider;
             _jobProvider = jobProvider;
+            _diskProvider = diskProvider;
+            _environmentProvider = environmentProvider;
             _configProvider = configProvider;
             _indexerProvider = indexerProvider;
             _qualityProvider = qualityProvider;
@@ -152,28 +158,7 @@ namespace NzbDrone.Web.Controllers
 
         public ActionResult Quality()
         {
-            var profiles = _qualityProvider.All();
-
-            var defaultQualityQualityProfileId = Convert.ToInt32(_configProvider.DefaultQualityProfile);
-            var qualityProfileSelectList = new SelectList(profiles, "QualityProfileId", "Name");
-            var qualityTypesFromDb = _qualityTypeProvider.All();
-
-            var model = new QualityModel
-                            {
-                                DefaultQualityProfileId = defaultQualityQualityProfileId,
-                                QualityProfileSelectList = qualityProfileSelectList,
-                                SdtvMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 1).MaxSize,
-                                DvdMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 2).MaxSize,
-                                HdtvMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 4).MaxSize,
-                                Webdl720pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 5).MaxSize,
-                                Webdl1080pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 3).MaxSize,
-                                Bluray720pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 6).MaxSize,
-                                Bluray1080pMaxSize = qualityTypesFromDb.Single(q => q.QualityTypeId == 7).MaxSize
-                            };
-
-            ViewData["Profiles"] = profiles.Select(s => s.QualityProfileId).ToList();
-
-            return View(model);
+            return View();
         }
 
         public ActionResult Notifications()
@@ -229,21 +214,20 @@ namespace NzbDrone.Web.Controllers
         public ActionResult System()
         {
             var selectedAuthenticationType = _configFileProvider.AuthenticationType;
-            var authenticationTypes = new List<AuthenticationType>();
-
-            foreach (AuthenticationType authenticationType in Enum.GetValues(typeof(AuthenticationType)))
-            {
-                authenticationTypes.Add(authenticationType);
-            }
-
-            var authTypeSelectList = new SelectList(authenticationTypes, selectedAuthenticationType);
-
+            var authTypeSelectList = new SelectList(Enum.GetValues(typeof(AuthenticationType)), selectedAuthenticationType);
+            var theme = _configFileProvider.Theme;
+            var themes = new List<String> {"Default"};
+            themes.AddRange(_diskProvider.GetDirectories(Path.Combine(_environmentProvider.GetWebRoot(), "Themes")).Select(s => new DirectoryInfo(s).Name));
+            var themeSelectList = new SelectList(themes, theme);
+            
             var model = new SystemSettingsModel();
             model.Port = _configFileProvider.Port;
             model.LaunchBrowser = _configFileProvider.LaunchBrowser;
             model.AuthenticationType = selectedAuthenticationType;
             model.AuthTypeSelectList = authTypeSelectList;
             model.RecycleBin = _configProvider.RecycleBin;
+            model.Theme = theme;
+            model.ThemeSelectList = themeSelectList;
 
             return View(model);
         }
@@ -257,60 +241,6 @@ namespace NzbDrone.Web.Controllers
             model.IgnoreArticlesWhenSortingSeries = _configProvider.IgnoreArticlesWhenSortingSeries;
 
             return View(model);
-        }
-
-        public PartialViewResult AddProfile()
-        {
-            var qualityProfile = new QualityProfile
-                                     {
-                                         Name = "New Profile",
-                                         Allowed = new List<QualityTypes> { QualityTypes.Unknown },
-                                         Cutoff = QualityTypes.Unknown
-                                     };
-
-            var qualityProfileId = _qualityProvider.Add(qualityProfile);
-
-            return GetQualityProfileView(qualityProfileId);
-        }
-
-        public PartialViewResult GetQualityProfileView(int profileId)
-        {
-            var profile = _qualityProvider.Get(profileId);
-
-            var model = new QualityProfileModel();
-            model.QualityProfileId = profile.QualityProfileId;
-            model.Name = profile.Name;
-            model.Allowed = profile.Allowed;
-            model.Sdtv = profile.Allowed.Contains(QualityTypes.SDTV);
-            model.Dvd = profile.Allowed.Contains(QualityTypes.DVD);
-            model.Hdtv = profile.Allowed.Contains(QualityTypes.HDTV720p);
-            model.Webdl720p = profile.Allowed.Contains(QualityTypes.WEBDL720p);
-            model.Webdl1080p = profile.Allowed.Contains(QualityTypes.WEBDL1080p);
-            model.Bluray720p = profile.Allowed.Contains(QualityTypes.Bluray720p);
-            model.Bluray1080p = profile.Allowed.Contains(QualityTypes.Bluray1080p);
-            model.Cutoff = (int)profile.Cutoff;
-
-            model.SdtvId = QualityTypes.SDTV.Id;
-            model.DvdId = QualityTypes.DVD.Id;
-            model.HdtvId = QualityTypes.HDTV720p.Id;
-            model.Webdl720pId = QualityTypes.WEBDL720p.Id;
-            model.Webdl1080pId = QualityTypes.WEBDL1080p.Id;
-            model.Bluray720pId = QualityTypes.Bluray720p.Id;
-            model.Bluray1080pId = QualityTypes.Bluray1080p.Id;
-
-            return PartialView("QualityProfileItem", model);
-        }
-
-        [HttpPost]
-        [JsonErrorFilter]
-        public JsonResult DeleteQualityProfile(int profileId)
-        {
-            if (_seriesProvider.GetAllSeries().Where(s => s.QualityProfileId == profileId).Count() != 0)
-                return JsonNotificationResult.Oops("Profile is still in use.");
-
-            _qualityProvider.Delete(profileId);
-
-            return Json("ok");
         }
 
         public PartialViewResult AddNewznabProvider()
@@ -653,6 +583,7 @@ namespace NzbDrone.Web.Controllers
                 _configFileProvider.LaunchBrowser = data.LaunchBrowser;
                 _configFileProvider.AuthenticationType = data.AuthenticationType;
                 _configProvider.RecycleBin = data.RecycleBin;
+                _configFileProvider.Theme = data.Theme;
 
                 return GetSuccessResult();
             }

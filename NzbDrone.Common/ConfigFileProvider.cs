@@ -68,7 +68,7 @@ namespace NzbDrone.Common
 
         public virtual string Theme
         {
-            get { return GetValue("Theme", ""); }
+            get { return GetValue("Theme", "Default"); }
             set { SetValue("Theme", value); }
         }
 

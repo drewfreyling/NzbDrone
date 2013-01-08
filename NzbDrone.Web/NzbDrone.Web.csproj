@@ -316,9 +316,11 @@
     <Compile Include="Models\TvDbSearchResultModel.cs" />
     <Compile Include="Models\UpcomingEpisodeModel.cs" />
     <Compile Include="Models\UpdateModel.cs" />
+    <Compile Include="NzbDroneViewEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Views\System\Index.cshtml" />
     <Content Include="Views\System\Logs.cshtml" />
+    <Content Include="Themes\Web.config" />
     <None Include="_bin_deployableAssemblies\x86\sqlcese40.dll" />
     <None Include="_bin_deployableAssemblies\x86\sqlceqp40.dll" />
     <None Include="_bin_deployableAssemblies\x86\sqlceme40.dll" />
