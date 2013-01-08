@@ -53,7 +53,6 @@ namespace NzbDrone.Web
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
 
-            //var razor = ViewEngines.Engines.Single(e => e is RazorViewEngine);
             ViewEngines.Engines.Clear();
             ViewEngines.Engines.Add(new NzbDroneViewEngine());
 
